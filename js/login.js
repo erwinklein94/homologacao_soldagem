@@ -7,20 +7,37 @@
 document.addEventListener("DOMContentLoaded", async () => {
   if (!window.exigeConfig()) return;
 
-  // Se já houver sessão ativa, vai direto para a área certa.
-  const sessao = await getSessao();
-  if (sessao) { await rotaPorPapel(); return; }
-
+  // Liga os formulários ANTES de qualquer espera de rede. Assim nunca acontece
+  // um envio nativo do formulário (que jogaria e-mail/senha na URL) enquanto o
+  // JavaScript ainda está carregando a sessão.
   ligarAbas();
   ligarFormAdmin();
   ligarFormAlunoLogin();
   ligarFormAlunoCriar();
+
+  // Se já houver sessão ativa, tenta ir direto para a área certa.
+  const sessao = await getSessao();
+  if (sessao) await rotaPorPapel();
 });
 
 // Lê o papel do usuário e redireciona. Admin -> Painel; Aluno -> Prova.
 async function rotaPorPapel() {
   const perfil = await getPerfil();
-  if (!perfil) { msg("[data-msg-admin]", "erro", "Não foi possível carregar seu perfil."); return; }
+  if (!perfil) {
+    // A conta autenticou, mas não há linha correspondente em public.profiles
+    // (ex.: banco ainda não configurado ou usuário criado antes do gatilho).
+    // Encerramos a sessão para o usuário não ficar preso num estado quebrado.
+    if (window.sb) await window.sb.auth.signOut();
+    console.error(
+      "Sessão autenticada sem perfil em public.profiles. " +
+      "Rode sql/schema.sql e o backfill de usuários no Supabase."
+    );
+    const aviso = "Conta autenticada, mas o perfil ainda não existe no banco. " +
+      "Fale com o administrador.";
+    msg("[data-msg-admin]", "erro", aviso);
+    msg("[data-msg-aluno-login]", "erro", aviso);
+    return;
+  }
   window.location.replace(perfil.role === "admin" ? "dashboard.html" : "prova.html");
 }
 

@@ -48,12 +48,32 @@ async function getPerfil() {
   if (_perfilCache) return _perfilCache;
   const sessao = await getSessao();
   if (!sessao) return null;
-  const { data, error } = await sb
+
+  let { data, error } = await sb
     .from("profiles")
     .select("id, nome, matricula, role")
     .eq("id", sessao.user.id)
-    .single();
+    .maybeSingle();
+
   if (error) { console.error("Erro ao carregar perfil:", error.message); return null; }
+
+  // Autodefesa: a conta existe no Auth, mas não há linha em profiles
+  // (gatilho não rodou, ou usuário criado antes do schema). Cria o próprio
+  // perfil como 'aluno' — permitido pela política RLS profiles_insert_self.
+  if (!data) {
+    const meta = sessao.user.user_metadata || {};
+    const novo = {
+      id: sessao.user.id,
+      nome: meta.nome || (sessao.user.email || "").split("@")[0],
+      matricula: meta.matricula || null,
+      role: "aluno",
+    };
+    const ins = await sb.from("profiles").insert(novo)
+      .select("id, nome, matricula, role").single();
+    if (ins.error) { console.error("Falha ao criar perfil:", ins.error.message); return null; }
+    data = ins.data;
+  }
+
   _perfilCache = { ...data, email: sessao.user.email };
   return _perfilCache;
 }

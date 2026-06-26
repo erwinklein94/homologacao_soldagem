@@ -25,14 +25,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function carregarProvas() {
   const { data, error } = await sb
-    .from("provas").select("*").eq("ativo", true).order("codigo");
+    .from("provas")
+    .select("*")
+    .eq("area", estado.perfil.area)
+    .eq("ativo", true)
+    .order("codigo");
   if (error) { console.error(error); return; }
   estado.provas = data || [];
 }
 
 async function carregarInstrutores() {
   const { data } = await sb
-    .from("profiles").select("id, nome").eq("role", "admin").order("nome");
+    .from("profiles")
+    .select("id, nome")
+    .eq("area", estado.perfil.area)
+    .eq("role", "admin")
+    .order("nome");
   estado.instrutores = data || [];
 }
 
@@ -221,6 +229,7 @@ async function enviarProva() {
 
   const registro = {
     aluno_id: estado.perfil.id,
+    area: estado.perfil.area,
     aluno_nome: estado.perfil.nome || estado.perfil.email,
     prova_id: estado.prova.id,
     prova_titulo: estado.prova.titulo,

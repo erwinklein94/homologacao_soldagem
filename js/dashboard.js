@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const perfil = await protegerPagina({ requerAdmin: true });
   if (!perfil) return;
 
-  const [tentativas, alunos] = await Promise.all([carregarTentativas(), carregarAlunos()]);
+  const [tentativas, alunos] = await Promise.all([carregarTentativas(perfil.area), carregarAlunos(perfil.area)]);
 
   renderKPIs(tentativas, alunos);
 
@@ -40,14 +40,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // --------------------------------------------------------------- carga
-async function carregarTentativas() {
-  const { data, error } = await sb.from("tentativas").select("*");
+async function carregarTentativas(area) {
+  const { data, error } = await sb.from("tentativas").select("*").eq("area", area);
   if (error) { console.error(error); return []; }
   return data || [];
 }
-async function carregarAlunos() {
+async function carregarAlunos(area) {
   const { data, error } = await sb
-    .from("profiles").select("id, nome, criado_em, role").eq("role", "aluno");
+    .from("profiles").select("id, nome, criado_em, role, area").eq("area", area).eq("role", "aluno");
   if (error) { console.error(error); return []; }
   return data || [];
 }

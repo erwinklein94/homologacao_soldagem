@@ -166,9 +166,9 @@ def main():
     ]
     for p in PROVAS:
         lines.append(
-            "insert into public.provas (codigo, titulo, descricao, nota_minima) values "
-            f"('{p['codigo']}', '{sql_escape(p['titulo'])}', '{sql_escape(p['descricao'])}', {p['nota_minima']}) "
-            "on conflict (codigo) do nothing;"
+            "insert into public.provas (area, codigo, titulo, descricao, nota_minima) values "
+            f"('solda', '{p['codigo']}', '{sql_escape(p['titulo'])}', '{sql_escape(p['descricao'])}', {p['nota_minima']}) "
+            "on conflict (area, codigo) do nothing;"
         )
     lines.append("")
     for p in PROVAS:
@@ -178,7 +178,7 @@ def main():
                 "insert into public.questoes (prova_id, ordem, enunciado, alternativas, correta, justificativa)\n"
                 f"select p.id, {qq['ordem']}, '{sql_escape(qq['enunciado'])}', "
                 f"'{sql_escape(alt_json)}'::jsonb, '{qq['correta']}', '{sql_escape(qq['justificativa'])}'\n"
-                f"from public.provas p where p.codigo = '{p['codigo']}'\n"
+                f"from public.provas p where p.area = 'solda' and p.codigo = '{p['codigo']}'\n"
                 "on conflict (prova_id, ordem) do nothing;"
             )
         lines.append("")

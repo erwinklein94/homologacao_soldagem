@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     .from("tentativas")
     .select("*, provas(nota_minima)")
     .eq("aluno_id", perfil.id)
+    .eq("area", perfil.area)
     .order("realizado_em", { ascending: false });
 
   const tentativas = error ? [] : (data || []);

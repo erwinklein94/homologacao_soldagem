@@ -6,23 +6,29 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
   if (!window.exigeConfig()) return;
+  const areaLogin = window.getAreaEscolhida();
+  if (!areaLogin) {
+    window.location.replace("index.html");
+    return;
+  }
+  aplicarTextoDaArea(areaLogin);
 
   // Liga os formulários ANTES de qualquer espera de rede. Assim nunca acontece
   // um envio nativo do formulário (que jogaria e-mail/senha na URL) enquanto o
   // JavaScript ainda está carregando a sessão.
   ligarAbas();
   ligarSenhaVisivel();
-  ligarFormAdmin();
-  ligarFormAlunoLogin();
-  ligarFormAlunoCriar();
+  ligarFormAdmin(areaLogin);
+  ligarFormAlunoLogin(areaLogin);
+  ligarFormAlunoCriar(areaLogin);
 
   // Se já houver sessão ativa, tenta ir direto para a área certa.
   const sessao = await getSessao();
-  if (sessao) await rotaPorPapel();
+  if (sessao) await rotaPorPapel({ areaEsperada: areaLogin });
 });
 
 // Lê o papel do usuário e redireciona. Admin -> Painel; Aluno -> Prova.
-async function rotaPorPapel() {
+async function rotaPorPapel({ areaEsperada, roleEsperada = null, msgSelector = null } = {}) {
   const perfil = await getPerfil();
   if (!perfil) {
     // A conta autenticou, mas não há linha correspondente em public.profiles
@@ -37,9 +43,42 @@ async function rotaPorPapel() {
       "Fale com o administrador.";
     msg("[data-msg-admin]", "erro", aviso);
     msg("[data-msg-aluno-login]", "erro", aviso);
-    return;
+    return false;
   }
+  if (perfil.area !== areaEsperada) {
+    if (window.sb) await window.sb.auth.signOut();
+    if (window.limparPerfilCache) window.limparPerfilCache();
+    const area = window.getAreaMeta(areaEsperada);
+    const aviso = `Este login pertence a outra área. Entre com uma conta cadastrada em ${area.titulo}.`;
+    msg(msgSelector || "[data-msg-aluno-login]", "erro", aviso);
+    msg("[data-msg-admin]", "erro", aviso);
+    return false;
+  }
+  if (roleEsperada && perfil.role !== roleEsperada) {
+    if (window.sb) await window.sb.auth.signOut();
+    if (window.limparPerfilCache) window.limparPerfilCache();
+    const aviso = roleEsperada === "admin"
+      ? "Esta conta não é administradora desta área."
+      : "Esta conta não é aluno desta área.";
+    msg(msgSelector || "[data-msg-aluno-login]", "erro", aviso);
+    return false;
+  }
+  window.setAreaEscolhida(perfil.area);
   window.location.replace(perfil.role === "admin" ? "dashboard.html" : "prova.html");
+  return true;
+}
+
+function aplicarTextoDaArea(areaId) {
+  const area = window.getAreaMeta(areaId);
+  document.title = `${area.titulo} · Login · Rumo`;
+  const titulo = document.querySelector("[data-area-titulo]");
+  const descricao = document.querySelector("[data-area-descricao]");
+  const rodape = document.querySelector("[data-area-rodape]");
+  const alunoLabel = document.querySelector("[data-label-aluno]");
+  if (titulo) titulo.textContent = area.titulo;
+  if (descricao) descricao.textContent = area.descricao;
+  if (rodape) rodape.textContent = area.rodape;
+  if (alunoLabel) alunoLabel.textContent = area.alunoLabel || "Aluno";
 }
 
 function ligarAbas() {
@@ -67,7 +106,7 @@ function ligarSenhaVisivel() {
   });
 }
 
-function ligarFormAdmin() {
+function ligarFormAdmin(areaLogin) {
   const f = document.querySelector("[data-form-admin]");
   f.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -78,11 +117,12 @@ function ligarFormAdmin() {
       email: f.email.value.trim(), password: f.senha.value,
     });
     if (error) { msg("[data-msg-admin]", "erro", traduzErro(error)); travar(btn, false); return; }
-    await rotaPorPapel();
+    const ok = await rotaPorPapel({ areaEsperada: areaLogin, roleEsperada: "admin", msgSelector: "[data-msg-admin]" });
+    if (!ok) travar(btn, false);
   });
 }
 
-function ligarFormAlunoLogin() {
+function ligarFormAlunoLogin(areaLogin) {
   const f = document.querySelector("[data-form-aluno-login]");
   f.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -93,11 +133,12 @@ function ligarFormAlunoLogin() {
       email: f.email.value.trim(), password: f.senha.value,
     });
     if (error) { msg("[data-msg-aluno-login]", "erro", traduzErro(error)); travar(btn, false); return; }
-    await rotaPorPapel();
+    const ok = await rotaPorPapel({ areaEsperada: areaLogin, roleEsperada: "aluno", msgSelector: "[data-msg-aluno-login]" });
+    if (!ok) travar(btn, false);
   });
 }
 
-function ligarFormAlunoCriar() {
+function ligarFormAlunoCriar(areaLogin) {
   const f = document.querySelector("[data-form-aluno-criar]");
   f.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -114,13 +155,14 @@ function ligarFormAlunoCriar() {
     const { data, error } = await sb.auth.signUp({
       email: f.email.value.trim(),
       password: f.senha.value,
-      options: { data: { nome: f.nome.value.trim(), matricula: f.matricula.value.trim() } },
+      options: { data: { nome: f.nome.value.trim(), matricula: f.matricula.value.trim(), area: areaLogin } },
     });
     if (error) { msg("[data-msg-aluno-criar]", "erro", traduzErro(error)); travar(btn, false); return; }
 
     if (data.session) {
       // Confirmação de e-mail desativada: já está logado.
-      await rotaPorPapel();
+      const ok = await rotaPorPapel({ areaEsperada: areaLogin, roleEsperada: "aluno", msgSelector: "[data-msg-aluno-criar]" });
+      if (!ok) travar(btn, false, "Criar primeiro acesso");
     } else {
       // Confirmação de e-mail ativada: precisa confirmar antes de entrar.
       msg("[data-msg-aluno-criar]", "ok",

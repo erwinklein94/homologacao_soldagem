@@ -19,6 +19,57 @@ function criarCliente() {
 const sb = criarCliente();
 window.sb = sb;
 
+const AREAS_HOMOLOGACAO = {
+  solda: {
+    id: "solda",
+    titulo: "Homologação de Solda",
+    subtitulo: "Soldagem Aluminotérmica",
+    alunoLabel: "Soldador / Aluno",
+    descricao: "Ambiente interno para avaliação, homologação e acompanhamento de soldadores em Soldagem Aluminotérmica de Trilhos.",
+    rodape: "Rumo · Uso interno — Homologação de Soldagem Aluminotérmica",
+  },
+  alivio_tensao: {
+    id: "alivio_tensao",
+    titulo: "Homologação Alívio de Tensão",
+    subtitulo: "Alívio de Tensão",
+    alunoLabel: "Aluno",
+    descricao: "Ambiente interno para avaliação, homologação e acompanhamento de alunos em Alívio de Tensão.",
+    rodape: "Rumo · Uso interno — Homologação Alívio de Tensão",
+  },
+};
+
+function areaValida(area) {
+  return Object.prototype.hasOwnProperty.call(AREAS_HOMOLOGACAO, area);
+}
+
+function getAreaEscolhida() {
+  const params = new URLSearchParams(window.location.search);
+  const pelaUrl = params.get("area");
+  if (areaValida(pelaUrl)) {
+    localStorage.setItem("homologacao_area", pelaUrl);
+    return pelaUrl;
+  }
+  const salva = localStorage.getItem("homologacao_area");
+  return areaValida(salva) ? salva : null;
+}
+
+function setAreaEscolhida(area) {
+  if (areaValida(area)) localStorage.setItem("homologacao_area", area);
+}
+
+function getAreaMeta(area) {
+  return AREAS_HOMOLOGACAO[area] || AREAS_HOMOLOGACAO.solda;
+}
+
+function urlLoginArea(area) {
+  return areaValida(area) ? `login.html?area=${encodeURIComponent(area)}` : "index.html";
+}
+
+window.AREAS_HOMOLOGACAO = AREAS_HOMOLOGACAO;
+window.getAreaEscolhida = getAreaEscolhida;
+window.setAreaEscolhida = setAreaEscolhida;
+window.getAreaMeta = getAreaMeta;
+
 // Banner amigável quando o config.js não foi preenchido.
 function exigeConfig() {
   if (sb) return true;
@@ -44,14 +95,15 @@ async function getSessao() {
 }
 
 let _perfilCache = null;
+let _perfilCacheUserId = null;
 async function getPerfil() {
-  if (_perfilCache) return _perfilCache;
   const sessao = await getSessao();
   if (!sessao) return null;
+  if (_perfilCache && _perfilCacheUserId === sessao.user.id) return _perfilCache;
 
   let { data, error } = await sb
     .from("profiles")
-    .select("id, nome, matricula, role")
+    .select("id, nome, matricula, role, area")
     .eq("id", sessao.user.id)
     .maybeSingle();
 
@@ -66,19 +118,25 @@ async function getPerfil() {
       id: sessao.user.id,
       nome: meta.nome || (sessao.user.email || "").split("@")[0],
       matricula: meta.matricula || null,
+      area: areaValida(meta.area) ? meta.area : (getAreaEscolhida() || "solda"),
       role: "aluno",
     };
     const ins = await sb.from("profiles").insert(novo)
-      .select("id, nome, matricula, role").single();
+      .select("id, nome, matricula, role, area").single();
     if (ins.error) { console.error("Falha ao criar perfil:", ins.error.message); return null; }
     data = ins.data;
   }
 
   _perfilCache = { ...data, email: sessao.user.email };
+  _perfilCacheUserId = sessao.user.id;
   return _perfilCache;
 }
 window.getSessao = getSessao;
 window.getPerfil = getPerfil;
+window.limparPerfilCache = function limparPerfilCache() {
+  _perfilCache = null;
+  _perfilCacheUserId = null;
+};
 
 // ---- Guardas de acesso ----
 // Em toda página protegida: sem sessão -> volta ao login.
@@ -86,7 +144,8 @@ window.getPerfil = getPerfil;
 async function protegerPagina({ requerAdmin = false } = {}) {
   if (!exigeConfig()) return null;
   const perfil = await getPerfil();
-  if (!perfil) { window.location.replace("index.html"); return null; }
+  if (!perfil) { window.location.replace(urlLoginArea(getAreaEscolhida())); return null; }
+  setAreaEscolhida(perfil.area);
   if (requerAdmin && perfil.role !== "admin") {
     window.location.replace("prova.html");
     return null;
@@ -103,6 +162,7 @@ function montarCabecalho(perfil) {
   if (!host) return;
   const atual = location.pathname.split("/").pop() || "index.html";
   const ehAdmin = perfil.role === "admin";
+  const area = getAreaMeta(perfil.area);
 
   const linksAdmin = [
     ["dashboard.html", "Painel"],
@@ -127,7 +187,7 @@ function montarCabecalho(perfil) {
       <a class="brand" href="${ehAdmin ? "dashboard.html" : "prova.html"}">
         <img src="assets/rumo-logo-branco.png" alt="Rumo" />
         <span class="brand__sep"></span>
-        <span class="brand__app">Homologação de Solda<span>Soldagem Aluminotérmica</span></span>
+        <span class="brand__app">${escaparHtml(area.titulo)}<span>${escaparHtml(area.subtitulo)}</span></span>
       </a>
       <nav class="nav" aria-label="Navegação principal">${links}</nav>
       <div class="user-chip">
@@ -145,7 +205,7 @@ window.montarCabecalho = montarCabecalho;
 
 async function sair() {
   if (sb) await sb.auth.signOut();
-  _perfilCache = null;
+  window.limparPerfilCache();
   window.location.replace("index.html");
 }
 window.sair = sair;

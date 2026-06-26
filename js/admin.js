@@ -28,14 +28,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // --------------------------------------------------------------- carga
 async function carregarProvas() {
-  const { data, error } = await sb.from("provas").select("*").order("codigo");
+  const { data, error } = await sb
+    .from("provas")
+    .select("*")
+    .eq("area", adm.perfil.area)
+    .order("codigo");
   if (error) { console.error(error); adm.provas = []; return; }
   adm.provas = data || [];
 }
 
 async function carregarTentativas() {
   const { data, error } = await sb
-    .from("tentativas").select("*").order("realizado_em", { ascending: false });
+    .from("tentativas")
+    .select("*")
+    .eq("area", adm.perfil.area)
+    .order("realizado_em", { ascending: false });
   if (error) { console.error(error); adm.tentativas = []; return; }
   adm.tentativas = data || [];
 }
@@ -167,8 +174,8 @@ async function carregarSeed(e) {
       const { data: prova, error: e1 } = await sb
         .from("provas")
         .upsert(
-          { codigo: p.codigo, titulo: p.titulo, descricao: p.descricao, nota_minima: p.nota_minima, ativo: true },
-          { onConflict: "codigo" }
+          { area: adm.perfil.area, codigo: p.codigo, titulo: p.titulo, descricao: p.descricao, nota_minima: p.nota_minima, ativo: true },
+          { onConflict: "area,codigo" }
         )
         .select().single();
       if (e1) throw e1;
@@ -238,7 +245,7 @@ async function criarProvaVazia() {
   const codigo = prompt("Código curto e único (ex.: D):", "");
   if (!codigo) return;
   const { data, error } = await sb.from("provas")
-    .insert({ codigo: codigo.trim(), titulo: titulo.trim(), descricao: "", nota_minima: 7, ativo: true })
+    .insert({ area: adm.perfil.area, codigo: codigo.trim(), titulo: titulo.trim(), descricao: "", nota_minima: 7, ativo: true })
     .select().single();
   if (error) { alert("Erro ao criar prova: " + error.message); return; }
   await carregarProvas();

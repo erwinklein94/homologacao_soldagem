@@ -416,28 +416,28 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 }
 
 .login-box {
-  width: min(100%, 1180px);
+  width: min(100%, 980px);
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(280px, 380px) 1fr;
-  gap: 1rem;
-  align-items: stretch;
+  grid-template-columns: minmax(250px, 315px) minmax(0, 1fr);
+  gap: .85rem;
+  align-items: center;
 }
 
 .login-intro,
 .login-acesso {
   background: rgba(255,255,255,.95);
   border: 1px solid rgba(255,255,255,.72);
-  border-radius: 26px;
-  box-shadow: 0 28px 90px rgba(0, 23, 40, .34);
+  border-radius: 22px;
+  box-shadow: 0 22px 64px rgba(0, 23, 40, .30);
   overflow: hidden;
 }
 
 .login-intro {
-  padding: clamp(1.45rem, 3vw, 2rem);
+  padding: clamp(1.25rem, 2.2vw, 1.65rem);
   position: relative;
-  min-height: 100%;
+  min-height: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -454,7 +454,7 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 
 .login-acesso {
   position: relative;
-  padding: clamp(1rem, 2.2vw, 1.35rem);
+  padding: clamp(.95rem, 1.7vw, 1.15rem);
 }
 
 .login-marca {
@@ -462,7 +462,7 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 }
 
 .login-marca img {
-  width: min(190px, 72%);
+  width: min(172px, 70%);
   min-width: 118px;
   display: block;
 }
@@ -477,7 +477,7 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
   letter-spacing: .08em;
   line-height: 1.2;
   text-transform: uppercase;
-  margin-bottom: .75rem;
+  margin-bottom: .6rem;
 }
 
 .login-kicker::before {
@@ -492,16 +492,16 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 
 .login-intro h1 {
   color: var(--rumo-azul);
-  font-size: clamp(1.7rem, 3.5vw, 2.45rem);
-  line-height: 1.02;
+  font-size: clamp(1.55rem, 3.1vw, 2.18rem);
+  line-height: 1.05;
   letter-spacing: -0.045em;
   margin-bottom: .75rem;
 }
 
 .login-intro > p {
   color: var(--rumo-texto);
-  font-size: .98rem;
-  margin-bottom: 1.1rem;
+  font-size: .94rem;
+  margin-bottom: 0;
 }
 
 .login-resumo {
@@ -562,18 +562,18 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 
 .login-cards {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
-  gap: .95rem;
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  gap: .8rem;
+  align-items: start;
 }
 
 .login-card {
   background: rgba(255,255,255,.98);
   border: 1px solid rgba(215,224,229,.98);
   border-top: 0;
-  border-radius: 20px;
-  box-shadow: 0 14px 38px rgba(0, 56, 101, .12);
-  padding: clamp(1rem, 2vw, 1.35rem);
+  border-radius: 17px;
+  box-shadow: 0 12px 30px rgba(0, 56, 101, .11);
+  padding: clamp(.9rem, 1.5vw, 1.08rem);
   transition: transform var(--rumo-transicao), box-shadow var(--rumo-transicao), border-color var(--rumo-transicao);
 }
 
@@ -590,26 +590,35 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 .login-card__topo {
   display: flex;
   align-items: flex-start;
-  gap: .85rem;
-  margin-bottom: .95rem;
+  gap: .7rem;
+  margin-bottom: .78rem;
+}
+
+.login-card__topo > div:last-child {
+  min-width: 0;
+}
+
+.login-card__topo h2,
+.login-card__topo p {
+  overflow-wrap: anywhere;
 }
 
 .login-card__icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   background:
     linear-gradient(135deg, rgba(214,237,250,.94), rgba(229,249,194,.62));
   margin: 0;
-  font-size: 1.32rem;
+  font-size: 1.15rem;
   flex: none;
 }
 
 .login-card h2 {
   color: var(--rumo-azul);
-  font-size: 1.18rem;
+  font-size: 1.08rem;
   letter-spacing: -.01em;
   margin: 0 .05rem .12rem 0;
 }
@@ -617,8 +626,8 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 .login-card .muted {
   color: var(--rumo-texto-claro);
   margin: 0;
-  font-size: .86rem;
-  line-height: 1.35;
+  font-size: .82rem;
+  line-height: 1.28;
 }
 
 .login-card form {
@@ -638,11 +647,11 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 }
 
 .login-card .input {
-  min-height: 44px;
-  border-radius: 12px;
+  min-height: 40px;
+  border-radius: 11px;
   border-color: var(--rumo-cinza-300);
   background: #fff;
-  padding: .66rem .82rem;
+  padding: .56rem .72rem;
 }
 
 .login-card .input:focus {
@@ -681,9 +690,11 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 }
 
 .login-card .btn {
-  min-height: 44px;
-  border-radius: 12px;
+  min-height: 40px;
+  border-radius: 11px;
   margin-top: .12rem;
+  white-space: normal;
+  line-height: 1.12;
 }
 
 .login-card .btn--primary {
@@ -712,7 +723,7 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 }
 
 .tabs button {
-  min-height: 36px;
+  min-height: 34px;
   border-radius: 10px;
   font-weight: 800;
 }
@@ -742,7 +753,7 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 @media (max-width: 1080px) {
   .login-box {
     grid-template-columns: 1fr;
-    max-width: 840px;
+    max-width: 760px;
   }
 
   .login-intro {

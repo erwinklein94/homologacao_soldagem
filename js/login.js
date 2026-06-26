@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // um envio nativo do formulário (que jogaria e-mail/senha na URL) enquanto o
   // JavaScript ainda está carregando a sessão.
   ligarAbas();
+  ligarSenhaVisivel();
   ligarFormAdmin();
   ligarFormAlunoLogin();
   ligarFormAlunoCriar();
@@ -49,6 +50,21 @@ function ligarAbas() {
     document.querySelectorAll("[data-painel]").forEach((p) =>
       p.classList.toggle("hidden", p.dataset.painel !== alvo));
   }));
+}
+
+function ligarSenhaVisivel() {
+  document.querySelectorAll("[data-toggle-password]").forEach((botao) => {
+    const input = document.getElementById(botao.dataset.togglePassword);
+    if (!input) return;
+
+    botao.addEventListener("click", () => {
+      const vaiMostrar = input.type === "password";
+      input.type = vaiMostrar ? "text" : "password";
+      botao.textContent = vaiMostrar ? "Ocultar" : "Mostrar";
+      botao.setAttribute("aria-label", vaiMostrar ? "Ocultar senha" : "Mostrar senha");
+      input.focus({ preventScroll: true });
+    });
+  });
 }
 
 function ligarFormAdmin() {
@@ -117,8 +133,9 @@ function ligarFormAlunoCriar() {
 // ---- helpers de UI ----
 function travar(btn, on, txt) {
   if (!btn) return;
+  if (!btn.dataset.textoOriginal) btn.dataset.textoOriginal = btn.textContent;
   btn.disabled = on;
-  if (txt) btn.textContent = txt;
+  btn.textContent = txt || (on ? btn.textContent : btn.dataset.textoOriginal);
 }
 function msg(sel, tipo, texto) {
   const el = document.querySelector(sel);

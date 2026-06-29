@@ -1,7 +1,7 @@
-# Homologação de Solda — Soldagem Aluminotérmica (Rumo)
+# Homologações Rumo — Solda e Alívio de Tensão
 
-Site estático (HTML + CSS + JavaScript puro) para um especialista da **Rumo** aplicar provas
-de homologação a soldadores. O soldador só é homologado com **nota 7,0 ou mais**. Ao final da
+Site estático (HTML + CSS + JavaScript puro) para especialistas da **Rumo** aplicarem provas
+de homologação em áreas separadas: **Soldagem Aluminotérmica** e **Alívio de Tensão**. O aluno só é homologado com **nota 7,0 ou mais**. Ao final da
 prova é gerado um **certificado em PDF**.
 
 Backend em **Supabase** (autenticação + banco Postgres + RLS). Roda no **GitHub Pages** sem
@@ -27,7 +27,7 @@ nenhuma etapa de build.
 ## 2. Estrutura dos arquivos
 
 ```
-index.html        Login (cartões de Administrador e Aluno)
+index.html        Entrada por área: Solda ou Alívio de Tensão
 prova.html        Execução da prova + resultado + PDF
 perfil.html       Histórico do aluno
 admin.html        Atividades dos alunos + editor de provas (somente admin)
@@ -41,9 +41,10 @@ js/perfil.js      Histórico do aluno
 js/admin.js       Atividades + editor de questões + carga das provas
 js/dashboard.js   KPIs e gráficos (Chart.js)
 js/certificado.js Geração do certificado em PDF (jsPDF)
-js/seed-data.js   As 3 provas do simulado (gerado automaticamente)
+js/seed-data.js   Provas padrão por área: solda e alívio de tensão
 sql/schema.sql    Tabelas, papéis, RLS e gatilhos
-sql/seed-provas.sql  As 3 provas em SQL (alternativa ao botão do admin)
+sql/seed-provas.sql  As 3 provas de solda em SQL (alternativa ao botão do admin)
+sql/seed-provas-alivio-tensao.sql  As 3 provas de alívio de tensão em SQL
 assets/           Logos da Rumo
 .nojekyll         Faz o GitHub Pages servir os arquivos como estão
 ```
@@ -101,13 +102,17 @@ Para promover outros administradores no futuro, repita o `update` acima.
 
 ---
 
-## 5. Carregar as 3 provas do simulado
+## 5. Carregar as provas padrão
 
-Depois de ter um administrador, entre como admin em **Dados & provas**. Se ainda não houver
-provas, aparece o botão **"Carregar as 3 provas do simulado"** — clique e pronto. Tudo fica
+Depois de ter um administrador, entre como admin em **Dados & provas** na área desejada. Se ainda não houver
+provas, aparece o botão **"Carregar provas padrão da área"** — clique e pronto. Tudo fica
 editável (título, descrição, nota mínima, questões, alternativas e gabarito).
 
-_Alternativa:_ rodar `sql/seed-provas.sql` no SQL Editor do Supabase.
+Para **Alívio de Tensão**, também existe o botão **"Substituir provas de alívio"** na aba de edição. Ele exclui/substitui as provas atuais da área e carrega as 3 provas novas baseadas no procedimento `MAN-VP-L-PRO-TR-0036-01`.
+
+_Alternativas via SQL:_
+- Solda: rode `sql/seed-provas.sql`.
+- Alívio de Tensão: rode `sql/seed-provas-alivio-tensao.sql`.
 
 ---
 

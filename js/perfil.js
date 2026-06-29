@@ -104,7 +104,7 @@ function renderHistorico(perfil, tentativas) {
         aluno_nome: t.aluno_nome, matricula: perfil.matricula,
         prova_titulo: t.prova_titulo, nota: t.nota, acertos: t.acertos, total: t.total,
         aprovado: t.aprovado, instrutor_nome: t.instrutor_nome, realizado_em: t.realizado_em,
-        nota_minima: t.provas?.nota_minima ?? 7, codigo: gerarCodigoCert(t.id),
+        nota_minima: t.provas?.nota_minima ?? 7, codigo: gerarCodigoCert(t.id), area: perfil.area,
       });
       travar(btn, false, "PDF");
     });

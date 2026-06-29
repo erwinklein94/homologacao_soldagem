@@ -235,3 +235,9 @@ begin
     raise notice 'Usuario Erwin.klein@ext.rumolog.com ainda nao existe em Authentication. Crie o usuario no Supabase Auth e rode este arquivo novamente.';
   end if;
 end $$;
+
+-- ---------------------------------------------------------------------
+-- 6) PROVAS PADRAO DA AREA DE ALIVIO DE TENSAO
+-- ---------------------------------------------------------------------
+-- Para carregar/substituir as 3 provas oficiais desta area, rode tambem:
+-- sql/seed-provas-alivio-tensao.sql

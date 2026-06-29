@@ -66,10 +66,16 @@ function renderInicio() {
     .map((a) => `<option value="${a.id}">${escaparHtml(a.nome)}</option>`)
     .join("") + `<option value="__outro">Outro (digitar)…</option>`;
 
+  const area = window.getAreaMeta ? window.getAreaMeta(estado.perfil.area) : null;
+  const tituloArea = estado.perfil.area === "alivio_tensao"
+    ? "Alívio de Tensões Térmicas em Trilhos"
+    : "Soldagem aluminotérmica de trilhos";
+  document.title = `Prova · ${area?.titulo || tituloArea} · Rumo`;
+
   host.innerHTML = `
     <div class="page__head">
       <div class="eyebrow">Avaliação teórica</div>
-      <h1>Soldagem aluminotérmica de trilhos</h1>
+      <h1>${escaparHtml(tituloArea)}</h1>
       <p class="muted">Você precisa de nota <b>7,0</b> ou mais para ser homologado. Ao final, baixe seu certificado em PDF.</p>
     </div>
     <hr class="trilho" />
@@ -299,7 +305,7 @@ function renderResultado(t) {
       aluno_nome: t.aluno_nome, matricula: estado.perfil.matricula,
       prova_titulo: t.prova_titulo, nota: t.nota, acertos: t.acertos, total: t.total,
       aprovado: t.aprovado, instrutor_nome: t.instrutor_nome, realizado_em: t.realizado_em,
-      nota_minima: estado.prova.nota_minima ?? 7, codigo,
+      nota_minima: estado.prova.nota_minima ?? 7, codigo, area: estado.perfil.area,
     });
     travarBtn(e.target, false, "Baixar certificado (PDF)");
   });

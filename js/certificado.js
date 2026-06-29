@@ -34,6 +34,11 @@ async function gerarCertificadoPDF(d) {
   const W = doc.internal.pageSize.getWidth();   // ~297
   const H = doc.internal.pageSize.getHeight();  // ~210
   const aprovado = !!d.aprovado;
+  const areaId = d.area || "solda";
+  const tema = areaId === "alivio_tensao" ? "Alívio de Tensões Térmicas em Trilhos" : "Soldagem Aluminotérmica de Trilhos";
+  const procedimento = areaId === "alivio_tensao" ? "MAN-VP-L-PRO-TR-0036-01" : "MAN-VP-T-PRO-SO-0001";
+  const avaliacao = areaId === "alivio_tensao" ? "avaliação teórica de alívio de tensões térmicas em trilhos" : "avaliação teórica de soldagem aluminotérmica";
+  const portal = areaId === "alivio_tensao" ? "Homologação Alívio de Tensão" : "Homologação de Soldagem Aluminotérmica";
 
   // Moldura
   doc.setDrawColor(...RGB.azul);
@@ -59,8 +64,8 @@ async function gerarCertificadoPDF(d) {
     doc.text("rumo", 20, 30);
   }
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...RGB.cinza);
-  doc.text("Soldagem Aluminotérmica de Trilhos", W - 20, 26, { align: "right" });
-  doc.text("MAN-VP-T-PRO-SO-0001 (R3)", W - 20, 31, { align: "right" });
+  doc.text(tema, W - 20, 26, { align: "right" });
+  doc.text(procedimento, W - 20, 31, { align: "right" });
 
   // Título
   doc.setFont("helvetica", "bold"); doc.setTextColor(...RGB.azul);
@@ -76,7 +81,7 @@ async function gerarCertificadoPDF(d) {
 
   doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(...RGB.texto);
   const matr = d.matricula ? `matrícula ${d.matricula}, ` : "";
-  const linha = `${matr}realizou a avaliação teórica de soldagem aluminotérmica`;
+  const linha = `${matr}realizou a ${avaliacao}`;
   doc.text(linha, W / 2, 95, { align: "center" });
   doc.setFont("helvetica", "bold");
   doc.text(`“${d.prova_titulo || ""}”.`, W / 2, 102, { align: "center" });
@@ -114,7 +119,7 @@ async function gerarCertificadoPDF(d) {
 
   doc.setFontSize(8); doc.setTextColor(...RGB.cinza);
   doc.text(`Código de verificação: ${d.codigo}`, W / 2, H - 16, { align: "center" });
-  doc.text("Documento gerado pelo portal de Homologação de Soldagem Aluminotérmica — Rumo.", W / 2, H - 12, { align: "center" });
+  doc.text(`Documento gerado pelo portal de ${portal} — Rumo.`, W / 2, H - 12, { align: "center" });
 
   const nomeArq = `certificado-${(d.aluno_nome || "aluno").toLowerCase().replace(/\s+/g, "-")}-${d.codigo}.pdf`;
   doc.save(nomeArq);

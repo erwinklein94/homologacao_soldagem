@@ -1,80 +1,100 @@
 -- =====================================================================
--- Homologacoes Rumo — Schema do banco (Supabase / Postgres)
--- Areas separadas por perfil:
---   solda          -> Homologacao de Solda
---   alivio_tensao  -> Homologacao Alivio de Tensao
+-- MIGRACAO — Primeiro acesso separado por area com o mesmo e-mail
 --
--- IMPORTANTE:
--- O mesmo usuario do Supabase Auth pode ter mais de um perfil em
--- public.profiles, um para cada area. Exemplo: mesmo e-mail como aluno em
--- solda e tambem como aluno em alivio_tensao.
+-- Rode este arquivo no SQL Editor do Supabase para permitir que o mesmo
+-- usuario do Auth tenha um perfil em Solda e outro em Alivio de Tensao.
+-- Depois de rodar, o aluno que ja se cadastrou em Solda consegue fazer o
+-- primeiro acesso em Alivio usando o mesmo e-mail e a mesma senha.
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
--- 1) TABELAS
+-- 1) GARANTE COLUNAS DE AREA
 -- ---------------------------------------------------------------------
 
-create table if not exists public.profiles (
-  id          uuid not null references auth.users (id) on delete cascade,
-  nome        text not null default '',
-  matricula   text,
-  area        text not null default 'solda' check (area in ('solda', 'alivio_tensao')),
-  role        text not null default 'aluno' check (role in ('aluno', 'admin')),
-  criado_em   timestamptz not null default now(),
-  primary key (id, area)
-);
+alter table public.profiles
+  add column if not exists area text not null default 'solda'
+  check (area in ('solda', 'alivio_tensao'));
 
-create table if not exists public.provas (
-  id            uuid primary key default gen_random_uuid(),
-  area          text not null default 'solda' check (area in ('solda', 'alivio_tensao')),
-  codigo        text not null,
-  titulo        text not null,
-  descricao     text default '',
-  nota_minima   numeric not null default 7,
-  ativo         boolean not null default true,
-  criado_em     timestamptz not null default now(),
-  atualizado_em timestamptz not null default now(),
-  unique (area, codigo)
-);
+alter table public.provas
+  add column if not exists area text not null default 'solda'
+  check (area in ('solda', 'alivio_tensao'));
 
-create table if not exists public.questoes (
-  id            uuid primary key default gen_random_uuid(),
-  prova_id      uuid not null references public.provas (id) on delete cascade,
-  ordem         int not null,
-  enunciado     text not null,
-  alternativas  jsonb not null default '[]'::jsonb,
-  correta       text not null,
-  justificativa text default '',
-  unique (prova_id, ordem)
-);
+alter table public.tentativas
+  add column if not exists area text not null default 'solda'
+  check (area in ('solda', 'alivio_tensao'));
 
-create table if not exists public.tentativas (
-  id             uuid primary key default gen_random_uuid(),
-  area           text not null default 'solda' check (area in ('solda', 'alivio_tensao')),
-  aluno_id       uuid not null,
-  aluno_nome     text not null default '',
-  prova_id       uuid references public.provas (id) on delete set null,
-  prova_titulo   text not null default '',
-  instrutor_id   uuid,
-  instrutor_nome text not null default '',
-  nota           numeric not null,
-  acertos        int not null,
-  total          int not null,
-  aprovado       boolean not null,
-  respostas      jsonb not null default '{}'::jsonb,
-  realizado_em   timestamptz not null default now(),
-  foreign key (aluno_id, area) references public.profiles (id, area) on delete cascade
-);
+update public.profiles set area = 'solda' where area is null;
+update public.provas set area = 'solda' where area is null;
+update public.tentativas set area = 'solda' where area is null;
+
+-- ---------------------------------------------------------------------
+-- 2) TROCA public.profiles DE 1 PERFIL POR E-MAIL PARA 1 PERFIL POR AREA
+-- ---------------------------------------------------------------------
+
+alter table public.tentativas drop constraint if exists tentativas_aluno_id_fkey;
+alter table public.tentativas drop constraint if exists tentativas_instrutor_id_fkey;
+
+-- Remove a chave antiga somente se ela era apenas por id.
+-- Se a chave ja for (id, area), nao mexe nela; isso permite rodar o SQL novamente.
+do $$
+begin
+  if exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.profiles'::regclass
+      and conname = 'profiles_pkey'
+      and array_length(conkey, 1) = 1
+  ) then
+    alter table public.profiles drop constraint profiles_pkey;
+  end if;
+end $$;
+
+-- Cria chave nova por usuario + area.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.profiles'::regclass
+      and conname = 'profiles_pkey'
+  ) then
+    alter table public.profiles add constraint profiles_pkey primary key (id, area);
+  end if;
+end $$;
+
+-- Garante que tentativas apontem para o perfil da mesma area.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.tentativas'::regclass
+      and conname = 'tentativas_aluno_area_fkey'
+  ) then
+    alter table public.tentativas
+      add constraint tentativas_aluno_area_fkey
+      foreign key (aluno_id, area)
+      references public.profiles (id, area)
+      on delete cascade;
+  end if;
+end $$;
+
+-- ---------------------------------------------------------------------
+-- 3) INDICES E CHAVE DE PROVAS POR AREA
+-- ---------------------------------------------------------------------
+
+alter table public.provas drop constraint if exists provas_codigo_key;
+create unique index if not exists provas_area_codigo_key
+  on public.provas (area, codigo);
 
 create index if not exists idx_profiles_area_role on public.profiles (area, role);
 create index if not exists idx_profiles_id_area on public.profiles (id, area);
 create index if not exists idx_provas_area_codigo on public.provas (area, codigo);
-create index if not exists idx_questoes_prova on public.questoes (prova_id, ordem);
 create index if not exists idx_tentativas_area_aluno on public.tentativas (area, aluno_id, realizado_em desc);
 create index if not exists idx_tentativas_area_data on public.tentativas (area, realizado_em);
 
 -- ---------------------------------------------------------------------
--- 2) FUNCOES DE APOIO PARA RLS
+-- 4) FUNCOES DE APOIO PARA RLS
 -- ---------------------------------------------------------------------
 
 create or replace function public.tem_acesso_area(area_alvo text)
@@ -99,8 +119,8 @@ security definer
 set search_path = public
 stable
 as $$
-  -- Mantida por compatibilidade com versões antigas.
-  -- Em sistema multiárea, a área correta deve vir do filtro da consulta.
+  -- Mantida por compatibilidade com versoes antigas.
+  -- Em sistema multi-area, a area correta vem do filtro da consulta.
   select p.area
   from public.profiles p
   where p.id = auth.uid()
@@ -140,8 +160,7 @@ as $$
 $$;
 
 -- ---------------------------------------------------------------------
--- 3) TRIGGER: ao criar usuario no Auth, cria profile como aluno da area.
---    A area vem de raw_user_meta_data.area enviado no primeiro acesso.
+-- 5) TRIGGER DE NOVOS USUARIOS
 -- ---------------------------------------------------------------------
 
 create or replace function public.handle_new_user()
@@ -177,7 +196,7 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- ---------------------------------------------------------------------
--- 4) ROW LEVEL SECURITY
+-- 6) RLS SEPARADO POR AREA
 -- ---------------------------------------------------------------------
 
 alter table public.profiles   enable row level security;
@@ -185,7 +204,6 @@ alter table public.provas     enable row level security;
 alter table public.questoes   enable row level security;
 alter table public.tentativas enable row level security;
 
--- ---- profiles ----
 drop policy if exists profiles_select_own on public.profiles;
 drop policy if exists profiles_select_admins on public.profiles;
 drop policy if exists profiles_select_admin_all on public.profiles;
@@ -215,7 +233,6 @@ create policy profiles_update_admin on public.profiles
   for update using (public.is_admin_area(area))
   with check (public.is_admin_area(area));
 
--- ---- provas ----
 drop policy if exists provas_select_auth on public.provas;
 create policy provas_select_auth on public.provas
   for select using (auth.uid() is not null and public.tem_acesso_area(area));
@@ -225,7 +242,6 @@ create policy provas_write_admin on public.provas
   for all using (public.is_admin_area(area))
   with check (public.is_admin_area(area));
 
--- ---- questoes ----
 drop policy if exists questoes_select_auth on public.questoes;
 create policy questoes_select_auth on public.questoes
   for select using (
@@ -251,7 +267,6 @@ create policy questoes_write_admin on public.questoes
     )
   );
 
--- ---- tentativas ----
 drop policy if exists tentativas_select on public.tentativas;
 create policy tentativas_select on public.tentativas
   for select using (aluno_id = auth.uid() or public.is_admin_area(area));
@@ -269,12 +284,33 @@ drop policy if exists tentativas_delete_admin on public.tentativas;
 create policy tentativas_delete_admin on public.tentativas
   for delete using (public.is_admin_area(area));
 
--- =====================================================================
--- Para promover usuario a admin de uma area sem remover o acesso em outra:
---
--- insert into public.profiles (id, nome, matricula, area, role)
--- select id, split_part(email, '@', 1), null, 'alivio_tensao', 'admin'
--- from auth.users
--- where lower(email) = lower('email@exemplo.com')
--- on conflict (id, area) do update set role = 'admin';
--- =====================================================================
+-- ---------------------------------------------------------------------
+-- 7) ADMINISTRADOR DA AREA DE ALIVIO
+-- ---------------------------------------------------------------------
+-- O usuario precisa existir em Authentication. Este comando NAO cria senha;
+-- ele cria/ajusta apenas o perfil da area alivio_tensao.
+
+insert into public.profiles (id, nome, matricula, area, role)
+select
+  u.id,
+  coalesce(nullif(u.raw_user_meta_data ->> 'nome', ''), split_part(u.email, '@', 1)),
+  u.raw_user_meta_data ->> 'matricula',
+  'alivio_tensao',
+  'admin'
+from auth.users u
+where lower(u.email) = lower('Erwin.klein@ext.rumolog.com')
+on conflict (id, area) do update
+set
+  role = 'admin',
+  nome = coalesce(nullif(public.profiles.nome, ''), excluded.nome),
+  matricula = coalesce(public.profiles.matricula, excluded.matricula);
+
+do $$
+begin
+  if not exists (
+    select 1 from auth.users
+    where lower(email) = lower('Erwin.klein@ext.rumolog.com')
+  ) then
+    raise notice 'Usuario Erwin.klein@ext.rumolog.com ainda nao existe em Authentication. Crie o usuario no Supabase Auth e rode este arquivo novamente.';
+  end if;
+end $$;

@@ -152,15 +152,51 @@ function ligarFormAlunoCriar(areaLogin) {
     const btn = f.querySelector("button[type=submit]");
     travar(btn, true, "Criando acesso…");
 
+    const email = f.email.value.trim();
+    const dadosPerfil = { nome: f.nome.value.trim(), matricula: f.matricula.value.trim() };
+
     const { data, error } = await sb.auth.signUp({
-      email: f.email.value.trim(),
+      email,
       password: f.senha.value,
-      options: { data: { nome: f.nome.value.trim(), matricula: f.matricula.value.trim(), area: areaLogin } },
+      options: { data: { ...dadosPerfil, area: areaLogin } },
     });
-    if (error) { msg("[data-msg-aluno-criar]", "erro", traduzErro(error)); travar(btn, false); return; }
+
+    if (error) {
+      // O Supabase Auth não permite duplicar o mesmo e-mail.
+      // Se o e-mail já existe na outra área, entramos com a senha atual e criamos
+      // apenas o perfil separado desta área em public.profiles.
+      if (emailJaCadastrado(error)) {
+        const login = await sb.auth.signInWithPassword({ email, password: f.senha.value });
+        if (login.error) {
+          msg("[data-msg-aluno-criar]", "erro",
+            "Este e-mail já existe em outra área. Para liberar o primeiro acesso aqui, use a mesma senha do cadastro anterior.");
+          travar(btn, false, "Criar primeiro acesso");
+          return;
+        }
+
+        if (window.garantirPerfilArea) {
+          const perfilArea = await window.garantirPerfilArea(areaLogin, dadosPerfil);
+          if (!perfilArea) {
+            msg("[data-msg-aluno-criar]", "erro",
+              "Não consegui criar o perfil desta área. Confira se o SQL multiárea foi rodado no Supabase.");
+            travar(btn, false, "Criar primeiro acesso");
+            return;
+          }
+        }
+
+        const ok = await rotaPorPapel({ areaEsperada: areaLogin, roleEsperada: "aluno", msgSelector: "[data-msg-aluno-criar]" });
+        if (!ok) travar(btn, false, "Criar primeiro acesso");
+        return;
+      }
+
+      msg("[data-msg-aluno-criar]", "erro", traduzErro(error));
+      travar(btn, false);
+      return;
+    }
 
     if (data.session) {
       // Confirmação de e-mail desativada: já está logado.
+      if (window.garantirPerfilArea) await window.garantirPerfilArea(areaLogin, dadosPerfil);
       const ok = await rotaPorPapel({ areaEsperada: areaLogin, roleEsperada: "aluno", msgSelector: "[data-msg-aluno-criar]" });
       if (!ok) travar(btn, false, "Criar primeiro acesso");
     } else {
@@ -187,10 +223,15 @@ function msg(sel, tipo, texto) {
   el.style.marginTop = ".8rem";
   el.textContent = texto;
 }
+function emailJaCadastrado(error) {
+  const m = (error && error.message) || "";
+  return /already registered|already been registered|user already registered|email.*exists|already exists/i.test(m);
+}
+
 function traduzErro(error) {
   const m = (error && error.message) || "Erro inesperado.";
   if (/invalid login credentials/i.test(m)) return "E-mail ou senha incorretos.";
-  if (/already registered|already been registered/i.test(m)) return "Este e-mail já tem acesso. Use a aba “Entrar”.";
+  if (emailJaCadastrado(error)) return "Este e-mail já tem acesso. Use a aba “Entrar”.";
   if (/email.+confirm/i.test(m)) return "Confirme seu e-mail antes de entrar.";
   if (/rate limit/i.test(m)) return "Muitas tentativas. Aguarde um instante e tente de novo.";
   return m;

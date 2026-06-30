@@ -43,6 +43,7 @@ js/dashboard.js   KPIs e gráficos (Chart.js)
 js/certificado.js Geração do certificado em PDF (jsPDF)
 js/seed-data.js   Provas padrão por área: solda e alívio de tensão
 sql/schema.sql    Tabelas, papéis, RLS e gatilhos
+sql/multi-area-primeiro-acesso.sql  Migração para mesmo e-mail em Solda e Alívio
 sql/seed-provas.sql  As 3 provas de solda em SQL (alternativa ao botão do admin)
 sql/seed-provas-alivio-tensao.sql  As 3 provas de alívio de tensão em SQL
 assets/           Logos da Rumo
@@ -60,11 +61,14 @@ As bibliotecas externas (Supabase, Chart.js, jsPDF) são carregadas por CDN — 
 2. No projeto, abra **SQL Editor → New query**, cole **todo** o conteúdo de
    `sql/schema.sql` e clique em **Run**. Isso cria as tabelas, o RLS e o gatilho que transforma
    cada novo cadastro em "aluno".
-3. **Simplifique o primeiro acesso** (recomendado): em **Authentication → Providers → Email**,
-   desative **"Confirm email"**. Assim o soldador entra logo após criar o acesso, sem precisar
+3. Se o projeto Supabase já existia antes desta versão, rode também
+   `sql/multi-area-primeiro-acesso.sql`. Essa migração permite que o mesmo e-mail tenha um
+   perfil em **Solda** e outro perfil em **Alívio de Tensão**, sem misturar os dados.
+4. **Simplifique o primeiro acesso** (recomendado): em **Authentication → Providers → Email**,
+   desative **"Confirm email"**. Assim o aluno entra logo após criar o acesso, sem precisar
    confirmar e-mail. (Se preferir manter a confirmação, o sistema também funciona — o aluno
    recebe um e-mail antes de poder entrar.)
-4. Em **Project Settings → API Keys**, ficam a **Project URL** e a **Publishable key**
+5. Em **Project Settings → API Keys**, ficam a **Project URL** e a **Publishable key**
    (`sb_publishable_...`). **Neste pacote o `js/config.js` já está preenchido** com a URL e a
    chave publishable do seu projeto — não precisa mexer. Se um dia trocar de projeto ou rotacionar
    a chave, basta editar:
@@ -91,14 +95,18 @@ Não existe tela de "criar admin" (de propósito). O fluxo é:
 2. No Supabase, em **SQL Editor**, rode (trocando pelo e-mail usado):
 
 ```sql
-update public.profiles
-set role = 'admin'
-where id = (select id from auth.users where email = 'voce@rumolog.com');
+insert into public.profiles (id, nome, matricula, area, role)
+select id, split_part(email, '@', 1), null, 'solda', 'admin'
+from auth.users
+where lower(email) = lower('voce@rumolog.com')
+on conflict (id, area) do update set role = 'admin';
 ```
+
+Para administrador de **Alívio de Tensão**, troque `'solda'` por `'alivio_tensao'`.
 
 3. Saia e entre de novo pelo cartão **Administrador**. Pronto.
 
-Para promover outros administradores no futuro, repita o `update` acima.
+Para promover outros administradores no futuro, repita o `insert ... on conflict` acima na área correta.
 
 ---
 

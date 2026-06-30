@@ -95,47 +95,70 @@ async function getSessao() {
 }
 
 let _perfilCache = null;
-let _perfilCacheUserId = null;
-async function getPerfil() {
+let _perfilCacheKey = null;
+
+function dadosPerfilPadrao(sessao, area, dados = {}) {
+  const meta = sessao.user.user_metadata || {};
+  return {
+    id: sessao.user.id,
+    nome: (dados.nome || meta.nome || (sessao.user.email || "").split("@")[0] || "").trim(),
+    matricula: (dados.matricula || meta.matricula || null),
+    area,
+    role: "aluno",
+  };
+}
+
+// Garante um perfil separado para a área escolhida.
+// Isso permite o mesmo e-mail/Auth existir como aluno em Solda e também em Alívio,
+// sem misturar provas, tentativas ou permissões entre as áreas.
+async function garantirPerfilArea(areaPreferida = null, dados = {}) {
   const sessao = await getSessao();
   if (!sessao) return null;
-  if (_perfilCache && _perfilCacheUserId === sessao.user.id) return _perfilCache;
+
+  const area = areaValida(areaPreferida) ? areaPreferida : (getAreaEscolhida() || "solda");
+  const cacheKey = `${sessao.user.id}:${area}`;
+  if (_perfilCache && _perfilCacheKey === cacheKey) return _perfilCache;
 
   let { data, error } = await sb
     .from("profiles")
     .select("id, nome, matricula, role, area")
     .eq("id", sessao.user.id)
+    .eq("area", area)
     .maybeSingle();
 
   if (error) { console.error("Erro ao carregar perfil:", error.message); return null; }
 
-  // Autodefesa: a conta existe no Auth, mas não há linha em profiles
-  // (gatilho não rodou, ou usuário criado antes do schema). Cria o próprio
-  // perfil como 'aluno' — permitido pela política RLS profiles_insert_self.
+  // Autodefesa: a conta existe no Auth, mas ainda não tem perfil nesta área.
+  // Cria o vínculo como aluno apenas para a área atual.
   if (!data) {
-    const meta = sessao.user.user_metadata || {};
-    const novo = {
-      id: sessao.user.id,
-      nome: meta.nome || (sessao.user.email || "").split("@")[0],
-      matricula: meta.matricula || null,
-      area: areaValida(meta.area) ? meta.area : (getAreaEscolhida() || "solda"),
-      role: "aluno",
-    };
-    const ins = await sb.from("profiles").insert(novo)
-      .select("id, nome, matricula, role, area").single();
-    if (ins.error) { console.error("Falha ao criar perfil:", ins.error.message); return null; }
+    const novo = dadosPerfilPadrao(sessao, area, dados);
+    const ins = await sb
+      .from("profiles")
+      .insert(novo)
+      .select("id, nome, matricula, role, area")
+      .single();
+
+    if (ins.error) {
+      console.error("Falha ao criar perfil da área:", ins.error.message);
+      return null;
+    }
     data = ins.data;
   }
 
   _perfilCache = { ...data, email: sessao.user.email };
-  _perfilCacheUserId = sessao.user.id;
+  _perfilCacheKey = cacheKey;
   return _perfilCache;
+}
+
+async function getPerfil(areaPreferida = null) {
+  return garantirPerfilArea(areaPreferida || getAreaEscolhida());
 }
 window.getSessao = getSessao;
 window.getPerfil = getPerfil;
+window.garantirPerfilArea = garantirPerfilArea;
 window.limparPerfilCache = function limparPerfilCache() {
   _perfilCache = null;
-  _perfilCacheUserId = null;
+  _perfilCacheKey = null;
 };
 
 // ---- Guardas de acesso ----

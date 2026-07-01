@@ -42,10 +42,12 @@ js/admin.js       Atividades + editor de questões + carga das provas
 js/dashboard.js   KPIs e gráficos (Chart.js)
 js/certificado.js Geração do certificado em PDF (jsPDF)
 js/seed-data.js   Provas padrão por área: solda e alívio de tensão
+js/historico-alivio-tensao.js  Histórico legado de alívio (snapshot de reserva do Supabase)
 sql/schema.sql    Tabelas, papéis, RLS e gatilhos
 sql/multi-area-primeiro-acesso.sql  Migração para mesmo e-mail em Solda e Alívio
 sql/seed-provas.sql  As 3 provas de solda em SQL (alternativa ao botão do admin)
 sql/seed-provas-alivio-tensao.sql  As 3 provas de alívio de tensão em SQL
+sql/historico-alivio-tensao.sql  Cria a tabela do histórico de alívio e carrega os dados da planilha
 assets/           Logos da Rumo
 .nojekyll         Faz o GitHub Pages servir os arquivos como estão
 ```
@@ -121,6 +123,27 @@ Para **Alívio de Tensão**, também existe o botão **"Substituir provas de al�
 _Alternativas via SQL:_
 - Solda: rode `sql/seed-provas.sql`.
 - Alívio de Tensão: rode `sql/seed-provas-alivio-tensao.sql`.
+
+### Histórico de Alívio de Tensão (aba em "Dados & provas")
+
+A área de **Alívio de Tensão** tem, em **Dados & provas**, uma aba **Histórico** que reúne, num só
+lugar, os registros antigos importados da planilha e as provas novas aplicadas pelos fiscais no
+sistema. Esses dados legados ficam no Supabase, na tabela `historico_alivio_tensao`.
+
+Para criar a tabela e carregar os registros:
+
+1. Confirme que o `sql/schema.sql` já foi executado (ele cria a função `is_admin_area`, usada no RLS).
+2. Em **SQL Editor → New query**, cole **todo** o conteúdo de `sql/historico-alivio-tensao.sql` e clique em **Run**.
+   Isso cria a tabela, aplica o RLS (só admin de Alívio de Tensão lê/gerencia) e carrega os registros da planilha.
+   Rodar de novo **não duplica** os dados (a carga só ocorre se a tabela estiver vazia).
+
+Só admin da área de Alívio de Tensão enxerga esses dados (RLS). As provas aplicadas no sistema
+entram na aba automaticamente — não precisa mexer no banco para elas aparecerem. Enquanto a tabela
+não é criada, a aba funciona com um **snapshot de reserva** embutido em
+`js/historico-alivio-tensao.js`; depois de rodar o SQL, o Supabase passa a ser a fonte.
+
+Para recarregar o histórico legado no futuro: `truncate public.historico_alivio_tensao;` e rode o
+`sql/historico-alivio-tensao.sql` de novo (ou insira as linhas novas direto na tabela).
 
 ---
 

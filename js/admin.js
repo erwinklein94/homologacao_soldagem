@@ -9,6 +9,7 @@ const adm = {
   perfil: null,
   provas: [],          // lista de provas (id, codigo, titulo, ...)
   tentativas: [],      // todas as tentativas (admin enxerga tudo via RLS)
+  historico: [],       // histórico legado de Alívio de Tensão (tabela historico_alivio_tensao)
   provaSel: null,      // prova aberta no editor
   questoes: [],        // questões da prova aberta (estado editável em memória)
 };
@@ -19,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   adm.perfil = perfil;
 
   ligarAbas();
-  await Promise.all([carregarProvas(), carregarTentativas()]);
+  await Promise.all([carregarProvas(), carregarTentativas(), carregarHistoricoAlivio()]);
 
   conferirSeed();
   renderAtividades();
@@ -46,6 +47,28 @@ async function carregarTentativas() {
     .order("realizado_em", { ascending: false });
   if (error) { console.error(error); adm.tentativas = []; return; }
   adm.tentativas = data || [];
+}
+
+// Histórico legado importado da planilha, agora servido pelo Supabase.
+// Existe apenas na área de Alívio de Tensão (tabela public.historico_alivio_tensao).
+async function carregarHistoricoAlivio() {
+  if (adm.perfil?.area !== "alivio_tensao") { adm.historico = []; return; }
+  const { data, error } = await sb
+    .from("historico_alivio_tensao")
+    .select("*")
+    .order("data_inicio", { ascending: false });
+  if (error) {
+    // Tabela ainda não criada no Supabase → usa o snapshot embutido como fallback
+    // (js/historico-alivio-tensao.js). Rode sql/historico-alivio-tensao.sql para usar o banco.
+    console.warn("Histórico via Supabase indisponível, usando snapshot local:", error.message);
+    adm.historico = window.HISTORICO_ALIVIO_TENSAO || [];
+    return;
+  }
+  // O PostgREST pode devolver numeric como texto; garante nota numérica.
+  adm.historico = (data || []).map((r) => ({
+    ...r,
+    nota: (r.nota === null || r.nota === undefined || r.nota === "") ? null : Number(r.nota),
+  }));
 }
 
 // --------------------------------------------------------------- abas
@@ -179,7 +202,7 @@ function tentativaParaHistorico(t) {
 }
 
 function montarHistoricoCompleto() {
-  const legado = (window.HISTORICO_ALIVIO_TENSAO || []).map((r) => ({
+  const legado = (adm.historico || []).map((r) => ({
     ...r, instrutor: "—", origem: "Planilha",
   }));
   const doSistema = adm.tentativas.map(tentativaParaHistorico);

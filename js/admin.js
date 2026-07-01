@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   conferirSeed();
   renderAtividades();
   renderListaProvas();
+  configurarHistorico();
 });
 
 // --------------------------------------------------------------- carga
@@ -137,6 +138,209 @@ function desenharTabelaAtividades(fAluno, fProva, fResult) {
       <table class="tabela">
         <thead><tr>
           <th>Aluno</th><th>Prova</th><th>Nota</th><th>Resultado</th><th>Instrutor</th><th>Data</th>
+        </tr></thead>
+        <tbody>${corpo}</tbody>
+      </table>
+    </div>`;
+}
+
+// =====================================================================
+// 1b) HISTÓRICO — somente Alívio de Tensão
+// Reúne o histórico legado importado da planilha (window.HISTORICO_ALIVIO_TENSAO)
+// com as provas novas aplicadas pelos fiscais aqui no sistema (adm.tentativas).
+// =====================================================================
+function configurarHistorico() {
+  if (adm.perfil?.area !== "alivio_tensao") return;   // aba existe só nesta área
+  const btn = document.querySelector("[data-aba-historico-btn]");
+  if (btn) btn.classList.remove("hidden");
+  renderHistorico();
+}
+
+// Converte uma tentativa do sistema para o mesmo formato do histórico da planilha.
+function tentativaParaHistorico(t) {
+  return {
+    especificacao: t.prova_titulo || "—",
+    modalidade: "—",
+    categoria: "—",
+    data_inicio: t.realizado_em || null,
+    data_fim: t.realizado_em || null,
+    carga_horaria: "—",
+    local: "—",
+    gerencia: "—",
+    participante: t.aluno_nome || "—",
+    funcao: "—",
+    matricula: "—",
+    empresa: "—",
+    nota: (t.nota === null || t.nota === undefined) ? null : Number(t.nota),
+    aprovacao: t.aprovado ? "APROVADO" : "REPROVADO",
+    instrutor: t.instrutor_nome || "—",
+    origem: "Sistema",
+  };
+}
+
+function montarHistoricoCompleto() {
+  const legado = (window.HISTORICO_ALIVIO_TENSAO || []).map((r) => ({
+    ...r, instrutor: "—", origem: "Planilha",
+  }));
+  const doSistema = adm.tentativas.map(tentativaParaHistorico);
+  const todos = legado.concat(doSistema);
+  // Mais recentes primeiro (datas em ISO comparam corretamente como texto).
+  todos.sort((a, b) => String(b.data_inicio || "").localeCompare(String(a.data_inicio || "")));
+  return todos;
+}
+
+// dd/mm/aaaa sem depender de fuso (as datas legadas são só data, sem hora).
+function fmtDataHist(v) {
+  if (!v) return "—";
+  const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : fmtData(v, false);
+}
+
+function renderHistorico() {
+  const host = document.querySelector("[data-historico]");
+  if (!host) return;
+  const dados = montarHistoricoCompleto();
+
+  // Empresas (deduplicadas por maiúsculas) para o filtro.
+  const empresasMap = new Map();
+  dados.forEach((r) => {
+    const e = (r.empresa || "").trim();
+    if (e && e !== "—") { const u = e.toUpperCase(); if (!empresasMap.has(u)) empresasMap.set(u, u); }
+  });
+  const opcoesEmpresa = ['<option value="">Todas as empresas</option>']
+    .concat([...empresasMap.keys()].sort().map((e) => `<option value="${escaparHtml(e)}">${escaparHtml(e)}</option>`))
+    .join("");
+
+  host.innerHTML = `
+    <div class="card stack">
+      <div>
+        <p class="muted" style="margin:0 0 1rem">
+          Histórico completo de Alívio de Tensão: os registros importados da planilha
+          e as provas aplicadas pelos fiscais aqui no sistema, reunidos em um só lugar.
+        </p>
+        <div class="kpis" data-hist-kpis></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="field" style="margin:0;flex:1;min-width:200px">
+          <label for="h-part">Buscar participante</label>
+          <input id="h-part" class="input" placeholder="Nome do participante…" data-h-part />
+        </div>
+        <div class="field" style="margin:0;min-width:190px">
+          <label for="h-empresa">Empresa</label>
+          <select id="h-empresa" class="select" data-h-empresa>${opcoesEmpresa}</select>
+        </div>
+        <div class="field" style="margin:0;min-width:150px">
+          <label for="h-modalidade">Modalidade</label>
+          <select id="h-modalidade" class="select" data-h-modalidade>
+            <option value="">Todas</option>
+            <option value="TEÓRICO">Teórico</option>
+            <option value="PRÁTICO">Prático</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0;min-width:160px">
+          <label for="h-result">Resultado</label>
+          <select id="h-result" class="select" data-h-result>
+            <option value="">Todos</option>
+            <option value="ok">Aprovados</option>
+            <option value="reprov">Reprovados</option>
+            <option value="na">Sem nota</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0;min-width:170px">
+          <label for="h-origem">Origem</label>
+          <select id="h-origem" class="select" data-h-origem>
+            <option value="">Todas</option>
+            <option value="Planilha">Planilha histórica</option>
+            <option value="Sistema">Sistema</option>
+          </select>
+        </div>
+      </div>
+      <div data-hist-tabela></div>
+    </div>`;
+
+  const aplicar = () => desenharTabelaHistorico(dados, {
+    part: host.querySelector("[data-h-part]").value.trim().toLowerCase(),
+    empresa: host.querySelector("[data-h-empresa]").value,
+    modalidade: host.querySelector("[data-h-modalidade]").value,
+    result: host.querySelector("[data-h-result]").value,
+    origem: host.querySelector("[data-h-origem]").value,
+  });
+  host.querySelector("[data-h-part]").addEventListener("input", aplicar);
+  host.querySelector("[data-h-empresa]").addEventListener("change", aplicar);
+  host.querySelector("[data-h-modalidade]").addEventListener("change", aplicar);
+  host.querySelector("[data-h-result]").addEventListener("change", aplicar);
+  host.querySelector("[data-h-origem]").addEventListener("change", aplicar);
+  aplicar();
+}
+
+function desenharTabelaHistorico(dados, f) {
+  const linhas = dados.filter((r) => {
+    if (f.part && !(r.participante || "").toLowerCase().includes(f.part)) return false;
+    if (f.empresa && (r.empresa || "").toUpperCase() !== f.empresa) return false;
+    if (f.modalidade && (r.modalidade || "").toUpperCase() !== f.modalidade) return false;
+    if (f.result === "ok" && r.aprovacao !== "APROVADO") return false;
+    if (f.result === "reprov" && r.aprovacao !== "REPROVADO") return false;
+    if (f.result === "na" && r.aprovacao !== "NA") return false;
+    if (f.origem && r.origem !== f.origem) return false;
+    return true;
+  });
+
+  // KPIs sobre o recorte filtrado.
+  const kpis = document.querySelector("[data-hist-kpis]");
+  if (kpis) {
+    const notas = linhas.map((r) => r.nota).filter((n) => typeof n === "number" && !isNaN(n));
+    const aprov = linhas.filter((r) => r.aprovacao === "APROVADO").length;
+    const reprov = linhas.filter((r) => r.aprovacao === "REPROVADO").length;
+    const media = notas.length ? notas.reduce((a, b) => a + b, 0) / notas.length : null;
+    kpis.innerHTML = `
+      <div class="kpi"><div class="kpi__label">Registros</div><div class="kpi__value">${linhas.length}</div></div>
+      <div class="kpi kpi--verde"><div class="kpi__label">Aprovados</div><div class="kpi__value">${aprov}</div></div>
+      <div class="kpi"><div class="kpi__label">Reprovados</div><div class="kpi__value">${reprov}</div></div>
+      <div class="kpi"><div class="kpi__label">Média das notas</div><div class="kpi__value">${media === null ? "—" : fmtNota(media)}</div><div class="kpi__sub">${notas.length} com nota lançada</div></div>`;
+  }
+
+  const host = document.querySelector("[data-hist-tabela]");
+  if (linhas.length === 0) {
+    host.innerHTML = `<p class="muted center" style="padding:1.4rem 0">Nenhum registro encontrado com esses filtros.</p>`;
+    return;
+  }
+
+  const corpo = linhas.map((r) => {
+    const badgeRes =
+      r.aprovacao === "APROVADO" ? '<span class="badge badge--ok badge--dot">Aprovado</span>' :
+      r.aprovacao === "REPROVADO" ? '<span class="badge badge--erro badge--dot">Reprovado</span>' :
+      '<span class="badge badge--dot">—</span>';
+    const badgeOrig = r.origem === "Sistema"
+      ? '<span class="badge badge--ok badge--dot">Sistema</span>'
+      : '<span class="badge badge--dot">Planilha</span>';
+    const nota = (typeof r.nota === "number" && !isNaN(r.nota)) ? `<b>${fmtNota(r.nota)}</b>` : '<span class="muted">—</span>';
+    const modalidade = r.modalidade && r.modalidade !== "—"
+      ? r.modalidade.charAt(0) + r.modalidade.slice(1).toLowerCase() : "—";
+    return `<tr>
+      <td class="nowrap">${fmtDataHist(r.data_inicio)}</td>
+      <td>${escaparHtml(r.participante)}</td>
+      <td>${escaparHtml(r.funcao || "—")}</td>
+      <td>${escaparHtml(r.empresa || "—")}</td>
+      <td class="nowrap">${escaparHtml(r.matricula || "—")}</td>
+      <td>${escaparHtml(r.local || "—")}</td>
+      <td>${escaparHtml(r.gerencia || "—")}</td>
+      <td>${escaparHtml(modalidade)}</td>
+      <td>${escaparHtml(r.instrutor || "—")}</td>
+      <td class="nowrap">${nota}</td>
+      <td>${badgeRes}</td>
+      <td>${badgeOrig}</td>
+    </tr>`;
+  }).join("");
+
+  host.innerHTML = `
+    <p class="muted small" style="margin:.2rem 0 .6rem">${linhas.length} registro(s)</p>
+    <div class="tabela-wrap">
+      <table class="tabela">
+        <thead><tr>
+          <th>Data</th><th>Participante</th><th>Função</th><th>Empresa</th>
+          <th>Matrícula/CPF</th><th>Local</th><th>Gerência</th><th>Modalidade</th>
+          <th>Instrutor/Fiscal</th><th>Nota</th><th>Resultado</th><th>Origem</th>
         </tr></thead>
         <tbody>${corpo}</tbody>
       </table>

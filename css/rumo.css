@@ -867,3 +867,26 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
     border-radius: 18px;
   }
 }
+
+/* Painel de Alívio de Tensão — filtros do histórico */
+.dashboard-filtros .card__title {
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.dashboard-filtros__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: .75rem;
+  align-items: end;
+}
+.dashboard-filtros__busca {
+  grid-column: span 2;
+}
+@media (max-width: 900px) {
+  .dashboard-filtros__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-filtros__busca { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  .dashboard-filtros__grid { grid-template-columns: 1fr; }
+}

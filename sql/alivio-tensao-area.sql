@@ -318,5 +318,5 @@ end $$;
 -- ---------------------------------------------------------------------
 -- 8) PROVAS PADRAO DA AREA DE ALIVIO DE TENSAO
 -- ---------------------------------------------------------------------
--- Para carregar/substituir as 3 provas oficiais desta area, rode tambem:
+-- Para carregar/substituir as 2 provas ATT 4 oficiais desta area, rode tambem:
 -- sql/seed-provas-alivio-tensao.sql

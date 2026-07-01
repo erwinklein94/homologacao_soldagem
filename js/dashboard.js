@@ -65,6 +65,7 @@ async function carregarHistoricoAlivio(area) {
   const { data, error } = await sb
     .from("historico_alivio_tensao")
     .select("*")
+    .not("nota", "is", null)
     .order("data_inicio", { ascending: false });
 
   if (error) {
@@ -202,7 +203,8 @@ function origemNormalizada(v) {
 }
 
 function normalizarHistoricoLegado(registros) {
-  return (registros || []).map((r) => ({
+  return (registros || [])
+  .map((r) => ({
     especificacao: normalizarTexto(r.especificacao),
     modalidade: normalizarTexto(r.modalidade),
     categoria: normalizarTexto(r.categoria),
@@ -219,7 +221,8 @@ function normalizarHistoricoLegado(registros) {
     aprovacao: aprovacaoNormalizada(r.aprovacao),
     instrutor: normalizarTexto(r.instrutor || "—"),
     origem: origemNormalizada(r.origem),
-  }));
+  }))
+  .filter((r) => r.nota !== null);
 }
 
 function tentativaParaHistorico(t) {
@@ -310,7 +313,6 @@ function renderFiltrosHistorico(dados) {
             <option value="">Todos</option>
             <option value="APROVADO">Aprovados</option>
             <option value="REPROVADO">Reprovados</option>
-            <option value="NA">Sem nota / N.A.</option>
             <option value="COM_NOTA">Com nota</option>
           </select>
         </div>
@@ -380,7 +382,7 @@ function filtrarHistorico(dados, f) {
     if (f.origem && r.origem !== f.origem) return false;
     if (f.especificacao && chaveFiltro(r.especificacao) !== f.especificacao) return false;
     if (f.resultado === "COM_NOTA" && typeof r.nota !== "number") return false;
-    if (["APROVADO", "REPROVADO", "NA"].includes(f.resultado) && r.aprovacao !== f.resultado) return false;
+    if (["APROVADO", "REPROVADO"].includes(f.resultado) && r.aprovacao !== f.resultado) return false;
     if (f.dataInicio && (!data || data < f.dataInicio)) return false;
     if (f.dataFim && (!data || data > f.dataFim)) return false;
     return true;
@@ -444,7 +446,7 @@ function renderGradeHistorico() {
       <div class="grafico-card__canvas"><canvas id="chart-hist-mes"></canvas></div>
     </div>
     <div class="grafico-card">
-      <h3>Aprovação, reprovação e sem nota</h3>
+      <h3>Aprovação x reprovação</h3>
       <div class="grafico-card__canvas"><canvas id="chart-hist-resultado"></canvas></div>
     </div>
     <div class="grafico-card">
@@ -704,12 +706,11 @@ function graficoHistoricoPorMes(linhas) {
 function graficoHistoricoResultado(linhas) {
   const ap = linhas.filter((r) => r.aprovacao === "APROVADO").length;
   const re = linhas.filter((r) => r.aprovacao === "REPROVADO").length;
-  const na = linhas.filter((r) => r.aprovacao === "NA").length;
   novoGrafico("chart-hist-resultado", {
     type: "doughnut",
     data: {
-      labels: ["Aprovados", "Reprovados", "Sem nota / N.A."],
-      datasets: [{ data: [ap, re, na], backgroundColor: [CORES.verde, CORES.erro, CORES.cinza], borderWidth: 0 }],
+      labels: ["Aprovados", "Reprovados"],
+      datasets: [{ data: [ap, re], backgroundColor: [CORES.verde, CORES.erro], borderWidth: 0 }],
     },
     options: {
       responsive: true, maintainAspectRatio: false, cutout: "62%",

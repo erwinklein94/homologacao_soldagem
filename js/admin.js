@@ -2,7 +2,7 @@
 // admin.js — página exclusiva do Administrador (admin.html)
 // 1) Atividades: todas as tentativas dos alunos (nota, data, instrutor) com filtros.
 // 2) Provas & questões: editor para criar/alterar provas e suas questões.
-// Inclui o botão que carrega as 3 provas do simulado (window.PROVAS_SEED).
+// Inclui o botão que carrega as provas padrão da área (window.PROVAS_SEEDS).
 // =====================================================================
 
 const adm = {
@@ -53,22 +53,27 @@ async function carregarTentativas() {
 // Existe apenas na área de Alívio de Tensão (tabela public.historico_alivio_tensao).
 async function carregarHistoricoAlivio() {
   if (adm.perfil?.area !== "alivio_tensao") { adm.historico = []; return; }
+
+  // Remove do banco os registros legados sem nota, conforme solicitado.
+  // Se a tabela ainda não existir, o erro será tratado no SELECT abaixo e o snapshot local será usado.
+  await sb.from("historico_alivio_tensao").delete().is("nota", null);
+
   const { data, error } = await sb
     .from("historico_alivio_tensao")
     .select("*")
+    .not("nota", "is", null)
     .order("data_inicio", { ascending: false });
   if (error) {
     // Tabela ainda não criada no Supabase → usa o snapshot embutido como fallback
     // (js/historico-alivio-tensao.js). Rode sql/historico-alivio-tensao.sql para usar o banco.
     console.warn("Histórico via Supabase indisponível, usando snapshot local:", error.message);
-    adm.historico = window.HISTORICO_ALIVIO_TENSAO || [];
+    adm.historico = (window.HISTORICO_ALIVIO_TENSAO || []).filter((r) => r.nota !== null && r.nota !== undefined && r.nota !== "");
     return;
   }
-  // O PostgREST pode devolver numeric como texto; garante nota numérica.
-  adm.historico = (data || []).map((r) => ({
-    ...r,
-    nota: (r.nota === null || r.nota === undefined || r.nota === "") ? null : Number(r.nota),
-  }));
+  // O PostgREST pode devolver numeric como texto; garante nota numérica e mantém apenas registros com nota.
+  adm.historico = (data || [])
+    .map((r) => ({ ...r, nota: (r.nota === null || r.nota === undefined || r.nota === "") ? null : Number(r.nota) }))
+    .filter((r) => typeof r.nota === "number" && !isNaN(r.nota));
 }
 
 // --------------------------------------------------------------- abas
@@ -267,7 +272,6 @@ function renderHistorico() {
             <option value="">Todos</option>
             <option value="ok">Aprovados</option>
             <option value="reprov">Reprovados</option>
-            <option value="na">Sem nota</option>
           </select>
         </div>
         <div class="field" style="margin:0;min-width:170px">
@@ -304,7 +308,6 @@ function desenharTabelaHistorico(dados, f) {
     if (f.modalidade && (r.modalidade || "").toUpperCase() !== f.modalidade) return false;
     if (f.result === "ok" && r.aprovacao !== "APROVADO") return false;
     if (f.result === "reprov" && r.aprovacao !== "REPROVADO") return false;
-    if (f.result === "na" && r.aprovacao !== "NA") return false;
     if (f.origem && r.origem !== f.origem) return false;
     return true;
   });
@@ -492,7 +495,8 @@ function renderListaProvas() {
   const btnReset = host.querySelector("[data-reset-seed]");
   if (btnReset) {
     btnReset.addEventListener("click", (evt) => {
-      const ok = confirm("Isso vai excluir as provas atuais da área de Alívio de Tensão e carregar as 3 provas novas baseadas no procedimento. O histórico de tentativas já realizadas será mantido. Deseja continuar?");
+      const qtd = obterSeedArea().length;
+      const ok = confirm(`Isso vai excluir as provas atuais da área de Alívio de Tensão e carregar ${qtd} prova(s) novas baseadas nas planilhas ATT 4. O histórico de tentativas já realizadas será mantido. Deseja continuar?`);
       if (ok) carregarSeed(evt, { substituirArea: true });
     });
   }

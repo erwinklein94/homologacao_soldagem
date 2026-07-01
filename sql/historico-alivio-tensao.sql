@@ -1,7 +1,7 @@
 -- =====================================================================
 -- Homologacoes Rumo — Historico de Alivio de Tensao (dados legados)
 -- Cria a tabela public.historico_alivio_tensao, aplica RLS (somente admin da
--- area de Alivio de Tensao le/gerencia) e carrega os 249 registros
+-- area de Alivio de Tensao le/gerencia) e carrega os registros com nota
 -- importados da planilha "Historico_de_notas_alivio_de_tensao.xlsx".
 --
 -- COMO USAR: Supabase > SQL Editor > New query > cole TUDO > Run.
@@ -308,6 +308,11 @@ begin
     ('MAN-VP-L-PRO-TR-0036-01 – ALÍVIO DE TENSÕES TÉRMICAS EM TRILHO', 'TEÓRICO', 'HOMOLOGAÇÃO', '2026-06-16', '2026-06-16', '8h', 'CHAPADÃO DO SUL/MS', 'SP NORTE', 'Carlos Roberto Gomes', 'Supervisor', '298468000000', 'TRILL', 9.0, 'APROVADO');
   end if;
 end $$;
+
+-- Remove registros sem nota, tanto em cargas novas quanto em bases já existentes.
+delete from public.historico_alivio_tensao
+where nota is null;
+
 
 -- Conferencia rapida:
 -- select count(*) as total,

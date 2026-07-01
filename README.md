@@ -46,7 +46,7 @@ js/historico-alivio-tensao.js  Histórico legado de alívio (snapshot de reserva
 sql/schema.sql    Tabelas, papéis, RLS e gatilhos
 sql/multi-area-primeiro-acesso.sql  Migração para mesmo e-mail em Solda e Alívio
 sql/seed-provas.sql  As 3 provas de solda em SQL (alternativa ao botão do admin)
-sql/seed-provas-alivio-tensao.sql  As 3 provas de alívio de tensão em SQL
+sql/seed-provas-alivio-tensao.sql  As 2 provas ATT 4 de alívio de tensão em SQL
 sql/historico-alivio-tensao.sql  Cria a tabela do histórico de alívio e carrega os dados da planilha
 assets/           Logos da Rumo
 .nojekyll         Faz o GitHub Pages servir os arquivos como estão
@@ -118,7 +118,7 @@ Depois de ter um administrador, entre como admin em **Dados & provas** na área 
 provas, aparece o botão **"Carregar provas padrão da área"** — clique e pronto. Tudo fica
 editável (título, descrição, nota mínima, questões, alternativas e gabarito).
 
-Para **Alívio de Tensão**, também existe o botão **"Substituir provas de alívio"** na aba de edição. Ele exclui/substitui as provas atuais da área e carrega as 3 provas novas baseadas no procedimento `MAN-VP-L-PRO-TR-0036-01`.
+Para **Alívio de Tensão**, também existe o botão **"Substituir provas de alívio"** na aba de edição. Ele exclui/substitui as provas atuais da área e carrega as 2 provas ATT 4 baseadas nas planilhas anexadas.
 
 _Alternativas via SQL:_
 - Solda: rode `sql/seed-provas.sql`.

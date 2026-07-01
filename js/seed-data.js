@@ -870,866 +870,578 @@ window.PROVAS_SEEDS = {
   ],
   "alivio_tensao": [
     {
-      "codigo": "A",
-      "titulo": "Prova A — Fundamentos, TNR/FTN e Homologação",
-      "descricao": "Conceitos essenciais do alívio de tensões térmicas em trilhos, cálculo de temperatura neutra, faixa neutra, zonas do TLS e requisitos mínimos de qualificação.",
+      "codigo": "ATT4-1",
+      "titulo": "Prova ATT 4 — Parte 1",
+      "descricao": "Questões 1 a 10 da planilha PROVA DE ATT 4 RUMO_004 - Rev3, adaptadas para o modelo objetivo do sistema.",
       "nota_minima": 7,
       "questoes": [
         {
           "ordem": 1,
-          "enunciado": "Qual é o objetivo principal do procedimento de Alívio de Tensões Térmicas em trilhos?",
+          "enunciado": "Qual é o procedimento que determina os serviços de ATT na RUMO? (Marcar com \"X\" a ÚNICA resposta CORRETA)",
           "alternativas": [
             {
               "id": "a",
-              "texto": "Apenas definir o padrão visual das juntas de trilho."
+              "texto": "Nenhum;"
             },
             {
               "id": "b",
-              "texto": "Fixar condições técnicas para execução do ATT, dando mais estabilidade à via, menores tensões longitudinais e mais segurança."
+              "texto": "ENG-FRM-Limites na Rumo;"
             },
             {
               "id": "c",
-              "texto": "Substituir a necessidade de inspeção ultrassônica dos trilhos."
+              "texto": "ENG-ETS - E0011 - Limistes necessários para a linha ficar boa na RUMO;"
             },
             {
               "id": "d",
-              "texto": "Definir exclusivamente o cadastro de OS no SIV."
+              "texto": "MAN-VP-L-PRO-TR-0036-01 - Alívio De Tensões Térmicas Em Trilhos;"
             },
             {
               "id": "e",
-              "texto": "Padronizar somente a soldagem aluminotérmica de fechamento."
-            }
-          ],
-          "correta": "b",
-          "justificativa": "Item 1 — Objetivo."
-        },
-        {
-          "ordem": 2,
-          "enunciado": "A qual público e operação o procedimento se aplica?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Somente equipes próprias da Malha Paulista."
-            },
-            {
-              "id": "b",
-              "texto": "Somente terceiros que atuam em construção de linha nova."
-            },
-            {
-              "id": "c",
-              "texto": "Colaboradores próprios e terceiros que realizem ATT na Rumo — Operação Norte, incluindo Malha Paulista, Central, Norte, Métrica Norte e FMT."
-            },
-            {
-              "id": "d",
-              "texto": "Apenas operadores de equipamentos de grande porte."
-            },
-            {
-              "id": "e",
-              "texto": "Somente equipes de solda aluminotérmica em oficina."
-            }
-          ],
-          "correta": "c",
-          "justificativa": "Item 2 — Aplicação e vigência."
-        },
-        {
-          "ordem": 3,
-          "enunciado": "O que significa a sigla VERSE no contexto do procedimento?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Equipamento de medição da tensão térmica longitudinal do trilho."
-            },
-            {
-              "id": "b",
-              "texto": "Sistema de abertura de OS para equipes homologadas."
-            },
-            {
-              "id": "c",
-              "texto": "Tipo de junta isolante usada em trechos sinalizados."
-            },
-            {
-              "id": "d",
-              "texto": "Método de soldagem de fechamento de trilho."
-            },
-            {
-              "id": "e",
-              "texto": "Ferramenta usada apenas para inspeção ultrassônica."
-            }
-          ],
-          "correta": "a",
-          "justificativa": "Item 3 — Definições e siglas."
-        },
-        {
-          "ordem": 4,
-          "enunciado": "No procedimento, o que é flambagem de linha?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "A perda de material no boleto por desgaste ondulatório."
-            },
-            {
-              "id": "b",
-              "texto": "A formação de desalinhamento lateral severo causado por excessivas forças de compressão nos trilhos soldados."
-            },
-            {
-              "id": "c",
-              "texto": "O deslocamento vertical do dormente por socaria inadequada."
-            },
-            {
-              "id": "d",
-              "texto": "A abertura normal de folga em trilho curto."
-            },
-            {
-              "id": "e",
-              "texto": "O aquecimento controlado do trilho antes da soldagem."
-            }
-          ],
-          "correta": "b",
-          "justificativa": "Item 3 — Definição de flambagem de linha."
-        },
-        {
-          "ordem": 5,
-          "enunciado": "Como é calculada a Temperatura Neutra de Referência (TNR) indicada no procedimento?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "TNR = Tmax − Tmin."
-            },
-            {
-              "id": "b",
-              "texto": "TNR = (Tmax + Tmin) / 2 + 5 °C."
-            },
-            {
-              "id": "c",
-              "texto": "TNR = Tmax + 5 °C."
-            },
-            {
-              "id": "d",
-              "texto": "TNR = Tmin − 5 °C."
-            },
-            {
-              "id": "e",
-              "texto": "TNR = FTN × 2."
-            }
-          ],
-          "correta": "b",
-          "justificativa": "Item 4.1 — Cálculo de temperatura neutra de referência."
-        },
-        {
-          "ordem": 6,
-          "enunciado": "Qual é a expressão da Faixa de Temperatura Neutra (FTN) para assentamento e execução de ATT sem tensor térmico?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "FTN = TNR ± 5 °C."
-            },
-            {
-              "id": "b",
-              "texto": "FTN = TNR ± 15 °C."
-            },
-            {
-              "id": "c",
-              "texto": "FTN = Tmax ± 5 °C."
-            },
-            {
-              "id": "d",
-              "texto": "FTN = Tmin + 10 °C."
-            },
-            {
-              "id": "e",
-              "texto": "FTN = temperatura ambiente ± 5 °C."
-            }
-          ],
-          "correta": "a",
-          "justificativa": "Item 4.1 — FTN = TNR ± 5 °C."
-        },
-        {
-          "ordem": 7,
-          "enunciado": "Segundo o procedimento, quando o alívio de tensão for executado abaixo da faixa de temperatura neutra, o que passa a ser obrigatório?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Executar apenas com marreta comum."
-            },
-            {
-              "id": "b",
-              "texto": "Utilizar tensores hidráulicos."
-            },
-            {
-              "id": "c",
-              "texto": "Suspender definitivamente o serviço."
-            },
-            {
-              "id": "d",
-              "texto": "Trocar todos os dormentes do trecho."
-            },
-            {
-              "id": "e",
-              "texto": "Executar somente com junta metálica definitiva."
-            }
-          ],
-          "correta": "b",
-          "justificativa": "Item 4.1 — temperaturas inferiores exigem tensores hidráulicos."
-        },
-        {
-          "ordem": 8,
-          "enunciado": "O que é Zona de Respiração (ZR) no TLS?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "A parte central do TLS que não apresenta tendência a deslocamento longitudinal."
-            },
-            {
-              "id": "b",
-              "texto": "A extensão mínima a partir das extremidades onde o retensionamento da fixação resiste à tensão gerada pela variação de temperatura."
-            },
-            {
-              "id": "c",
-              "texto": "O ponto em que o trilho deve ser cortado obrigatoriamente com policorte."
-            },
-            {
-              "id": "d",
-              "texto": "A região da solda afetada termicamente pelo corte com maçarico."
-            },
-            {
-              "id": "e",
-              "texto": "O trecho exclusivo de passagem de máquinas de grande porte."
-            }
-          ],
-          "correta": "b",
-          "justificativa": "Item 4.2 — Zona de Respiração."
-        },
-        {
-          "ordem": 9,
-          "enunciado": "Qual é a experiência mínima exigida para Líder de Via / Encarregado de Via nos serviços correlatos de via permanente?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "6 meses."
-            },
-            {
-              "id": "b",
-              "texto": "1 ano."
-            },
-            {
-              "id": "c",
-              "texto": "2 anos."
-            },
-            {
-              "id": "d",
-              "texto": "3 anos."
-            },
-            {
-              "id": "e",
-              "texto": "5 anos."
+              "texto": "Nenhuma resposta anterior."
             }
           ],
           "correta": "d",
-          "justificativa": "Item 5 — Qualificação mínima do Líder/Encarregado."
+          "justificativa": "Gabarito da planilha: alternativa d."
         },
         {
-          "ordem": 10,
-          "enunciado": "Qual é a experiência mínima indicada para Trabalhador de Via Permanente atuar no procedimento?",
+          "ordem": 2,
+          "enunciado": "Qual é o procedimento que determina os limites de temperatura para serviços de trilho na RUMO?",
           "alternativas": [
             {
               "id": "a",
-              "texto": "6 meses em manutenção de Via Permanente e treinamento neste procedimento."
+              "texto": "Qualquer coisa, tanto faz, como tanto fez!!!"
             },
             {
               "id": "b",
-              "texto": "1 ano em manutenção de Via Permanente e certificação em EGP."
+              "texto": "Escolher a temperatura conforme que sempre foi usada;"
             },
             {
               "id": "c",
-              "texto": "2 anos em serviços de alívio e substituição de trilhos."
+              "texto": "ENG-ETS-ON-T001 - Temperaturas de Serviço na Ferrovia;"
             },
             {
               "id": "d",
-              "texto": "3 anos em manutenção de Via Permanente."
+              "texto": "ES-SPE-070-R4 - Temperaturas neutras de referência para serviços de trilhos;"
             },
             {
               "id": "e",
-              "texto": "5 anos comprovados por empresa especializada."
+              "texto": "Nenhum."
+            }
+          ],
+          "correta": "d",
+          "justificativa": "Gabarito da planilha: alternativa d."
+        },
+        {
+          "ordem": 3,
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) Calor no trilho faz com que ele dilate e diminua de tamanho;\nB) Frio no trilho faz com que ele contraia e diminua de tamanho;\nC) Frio no trilho faz com que ele dilate e diminua de tamanho;\nD) Calor no trilho faz com que ele contraia e aumente de tamanho;\nE) Calor no trilho faz com que ele dilate e aumente de tamanho;",
+          "alternativas": [
+            {
+              "id": "a",
+              "texto": "Sequência: C - C - E - E - C"
+            },
+            {
+              "id": "b",
+              "texto": "Sequência: E - C - E - E - C"
+            },
+            {
+              "id": "c",
+              "texto": "Sequência: E - E - E - E - C"
+            },
+            {
+              "id": "d",
+              "texto": "Sequência: E - C - C - E - C"
+            },
+            {
+              "id": "e",
+              "texto": "Sequência: E - C - E - C - C"
+            }
+          ],
+          "correta": "b",
+          "justificativa": "Gabarito da planilha: sequência E-C-E-E-C."
+        },
+        {
+          "ordem": 4,
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) ATT significa Alívio de Tensões Térmicas;\nB) FTN significa Faixa de Temperatura Negativa;\nC) TN significa a Temperatura Neutra dos Trilhos;\nD) VERSE é um carro;\nE) Faixa de Temperatura Neutra é a Temperatura Neutra + ou - 5°C.",
+          "alternativas": [
+            {
+              "id": "a",
+              "texto": "Sequência: E - E - C - E - C"
+            },
+            {
+              "id": "b",
+              "texto": "Sequência: C - C - C - E - C"
+            },
+            {
+              "id": "c",
+              "texto": "Sequência: C - E - C - E - C"
+            },
+            {
+              "id": "d",
+              "texto": "Sequência: C - E - E - E - C"
+            },
+            {
+              "id": "e",
+              "texto": "Sequência: C - E - C - C - C"
+            }
+          ],
+          "correta": "c",
+          "justificativa": "Gabarito da planilha: sequência C-E-C-E-C."
+        },
+        {
+          "ordem": 5,
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) O ATT deve ser feito em linhas novas, na instalação de TLS e quando o VERSE apontar;\nB) É importante passarmos o VERSE nas cristas e vales do perfil longitudinal da linha;\nC) É muito importante, colocar a mão embaixo do trilho;\nD) É muito importante que a turma seja homologada para fazer serviços de ATT;\nE) É proibido usar marreta que não seja de broze para aliviar o trilho.",
+          "alternativas": [
+            {
+              "id": "a",
+              "texto": "Sequência: E - C - E - C - C"
+            },
+            {
+              "id": "b",
+              "texto": "Sequência: C - E - E - C - C"
+            },
+            {
+              "id": "c",
+              "texto": "Sequência: C - C - C - C - C"
+            },
+            {
+              "id": "d",
+              "texto": "Sequência: C - C - E - C - C"
+            },
+            {
+              "id": "e",
+              "texto": "Sequência: C - C - E - E - C"
+            }
+          ],
+          "correta": "d",
+          "justificativa": "Gabarito da planilha: sequência C-C-E-C-C."
+        },
+        {
+          "ordem": 6,
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) Flambagem em reta tem a forma de C;\nB) Flambagem em curva tem forma de S;\nC) Flambagem ocorre com pouquíssima frequência em pontos fixos;\nD) Flambagem não deixa marcas nos trilhos de caminhamento e arraste de dormentes;\nE) Se tivermos um desalinhamento provocado pela flambagem >128mm na corda de 20m devemos interditar a linha.",
+          "alternativas": [
+            {
+              "id": "a",
+              "texto": "Sequência: C - E - E - E - C"
+            },
+            {
+              "id": "b",
+              "texto": "Sequência: E - C - E - E - C"
+            },
+            {
+              "id": "c",
+              "texto": "Sequência: E - E - C - E - C"
+            },
+            {
+              "id": "d",
+              "texto": "Sequência: E - E - E - C - C"
+            },
+            {
+              "id": "e",
+              "texto": "Sequência: E - E - E - E - C"
+            }
+          ],
+          "correta": "e",
+          "justificativa": "Gabarito da planilha: sequência E-E-E-E-C."
+        },
+        {
+          "ordem": 7,
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) Flambagem é muito fácil de prever;\nB) Fratura só acontece devido a problemas nos vagões;\nC) Fratura não é detectada por DTQ, nem circuito de via;\nD) O Verse mede a STF, que é a temperatura onde o trilho não terá nenhum esforço;\nE) Junta de dilatação não permite o caminhamento do trilho.",
+          "alternativas": [
+            {
+              "id": "a",
+              "texto": "Sequência: E - E - E - C - E"
+            },
+            {
+              "id": "b",
+              "texto": "Sequência: C - E - E - C - E"
+            },
+            {
+              "id": "c",
+              "texto": "Sequência: E - C - E - C - E"
+            },
+            {
+              "id": "d",
+              "texto": "Sequência: E - E - C - C - E"
+            },
+            {
+              "id": "e",
+              "texto": "Sequência: E - E - E - E - E"
             }
           ],
           "correta": "a",
-          "justificativa": "Item 5 — Qualificação mínima do Trabalhador de Via Permanente."
+          "justificativa": "Gabarito da planilha: sequência E-E-E-C-E."
+        },
+        {
+          "ordem": 8,
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) Amplitude térmica não provoca tensões nos trilhos.\nB) Quanto maior a amplitude térmica maior são as tensões geradas nos trilhos\nC) Para uma temperatura mínima de 10°C e uma temperatura máxima de 60°C, a amplitude térmica é de 50°C.\nD) Para uma temperatura mínima de -5°C e uma temperatura máxima de 50°C, a amplitude térmica é de 55°C.\nE) Para uma temperatura mínima de -5°C e uma temperatura máxima de 5°C, a amplitude térmica é de 5°C.",
+          "alternativas": [
+            {
+              "id": "a",
+              "texto": "Sequência: C - C - C - C - E"
+            },
+            {
+              "id": "b",
+              "texto": "Sequência: E - C - C - C - E"
+            },
+            {
+              "id": "c",
+              "texto": "Sequência: E - E - C - C - E"
+            },
+            {
+              "id": "d",
+              "texto": "Sequência: E - C - E - C - E"
+            },
+            {
+              "id": "e",
+              "texto": "Sequência: E - C - C - E - E"
+            }
+          ],
+          "correta": "b",
+          "justificativa": "Gabarito da planilha: sequência E-C-C-C-E."
+        },
+        {
+          "ordem": 9,
+          "enunciado": "Informação para a questão: Temperatura Neutra = 33°C.\nQual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) A Faixa de Temperatura nesse local será de 23°C a 43°C;\nB) A Faixa de Temperatura nesse local será de 30°C a 35°C;\nC) Qualquer serviço feito acima de 39°C estará acima da Faixa de Temperatura;\nD) Qualquer serviço feito abaixo de 27°C estará abaixo da Faixa de Temperatura;\nE) Qualquer serviço feito dentro da faixa de 30°C a 35°C, estará dentro da Faixa.",
+          "alternativas": [
+            {
+              "id": "a",
+              "texto": "Sequência: C - E - C - C - C"
+            },
+            {
+              "id": "b",
+              "texto": "Sequência: E - C - C - C - C"
+            },
+            {
+              "id": "c",
+              "texto": "Sequência: E - E - C - C - C"
+            },
+            {
+              "id": "d",
+              "texto": "Sequência: E - E - E - C - C"
+            },
+            {
+              "id": "e",
+              "texto": "Sequência: E - E - C - E - C"
+            }
+          ],
+          "correta": "c",
+          "justificativa": "Gabarito da planilha: sequência E-E-C-C-C."
+        },
+        {
+          "ordem": 10,
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) É melhor fraturar do que flambar;\nB) Só é permitido trabalhar com temperatura caindo; quando não usar tensor;\nC) É ótimo trabalhar acima da faixa de temperatura;\nD) Tensor hidráulico é usado abaixo da faixa e com temperatura caindo;\nE) O termômetro deve ficar exposto ao sol.",
+          "alternativas": [
+            {
+              "id": "a",
+              "texto": "Sequência: E - E - E - C - E"
+            },
+            {
+              "id": "b",
+              "texto": "Sequência: C - C - E - C - E"
+            },
+            {
+              "id": "c",
+              "texto": "Sequência: C - E - C - C - E"
+            },
+            {
+              "id": "d",
+              "texto": "Sequência: C - E - E - C - E"
+            },
+            {
+              "id": "e",
+              "texto": "Sequência: C - E - E - E - E"
+            }
+          ],
+          "correta": "d",
+          "justificativa": "Gabarito da planilha: sequência C-E-E-C-E."
         }
       ]
     },
     {
-      "codigo": "B",
-      "titulo": "Prova B — Segurança, Ferramentas e Critérios de Intervenção",
-      "descricao": "Avaliação sobre ferramental obrigatório, segurança operacional, condições de via, corte de trilho, uso do VERSE e critérios que exigem ou orientam o ATT.",
+      "codigo": "ATT4-2",
+      "titulo": "Prova ATT 4 — Parte 2",
+      "descricao": "Questões 11 a 20 da planilha PROVA DE ATT 4 RUMO_004 - Rev3, incluindo análise de gráficos, deslocamento e tensor hidráulico.",
       "nota_minima": 7,
       "questoes": [
         {
           "ordem": 1,
-          "enunciado": "Qual dos itens abaixo aparece na lista de materiais, equipamentos e ferramentas do ATT?",
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) Trilho curto é aquele que movimenta TODA a sua extenção;\nB) Trilho curto é aquele que tem junta numa das extremidadas;\nC) TLS é aquele que tem uma grande região com os esforços balanceados;\nD) TCS é o trilho que sempre terá menos que 600 metros;\nE) TLS é o trilho que tem no mínimo 2 vezes o comprimento de movimentação;",
           "alternativas": [
             {
               "id": "a",
-              "texto": "Tensor hidráulico e termômetro de contato calibrado."
+              "texto": "Sequência: E - E - C - E - C"
             },
             {
               "id": "b",
-              "texto": "Somente trena e nível óptico."
+              "texto": "Sequência: C - C - C - E - C"
             },
             {
               "id": "c",
-              "texto": "Equipamento de ultrassom como ferramenta obrigatória do ATT."
+              "texto": "Sequência: C - E - E - E - C"
             },
             {
               "id": "d",
-              "texto": "Pirômetro infravermelho sem contato como item obrigatório."
+              "texto": "Sequência: C - E - C - C - C"
             },
             {
               "id": "e",
-              "texto": "Máquina de solda elétrica orbital."
+              "texto": "Sequência: C - E - C - E - C"
             }
           ],
-          "correta": "a",
-          "justificativa": "Item 6 — Materiais, equipamentos e ferramentas."
+          "correta": "e",
+          "justificativa": "Gabarito da planilha: sequência C-E-C-E-C."
         },
         {
           "ordem": 2,
-          "enunciado": "Em inspeção mensal de ferramentas no mês de junho, qual cor deve ser usada para identificação?",
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) Processo de meia barra é aquele que faz o alívio em apenas um sentido;\nB) Processo de barra inteira é aquele que faz o alívio em apenas um sentido;\nC) Existem 2 principais tipos de modo de fazer alívio, forçado e natural;\nD) O método forçado é feito sem o uso de tensor hidráulico;\nE) Todas estão erradas.",
           "alternativas": [
             {
               "id": "a",
-              "texto": "Amarelo."
+              "texto": "Sequência: E - C - C - E - E"
             },
             {
               "id": "b",
-              "texto": "Verde."
+              "texto": "Sequência: C - C - C - E - E"
             },
             {
               "id": "c",
-              "texto": "Azul."
+              "texto": "Sequência: E - E - C - E - E"
             },
             {
               "id": "d",
-              "texto": "Vermelho."
+              "texto": "Sequência: E - C - E - E - E"
             },
             {
               "id": "e",
-              "texto": "Branco."
+              "texto": "Sequência: E - C - C - C - E"
             }
           ],
-          "correta": "b",
-          "justificativa": "Item 6 — tabela de cores: fevereiro, junho e outubro = verde."
+          "correta": "a",
+          "justificativa": "Gabarito da planilha: sequência E-C-C-E-E."
         },
         {
           "ordem": 3,
-          "enunciado": "O que o procedimento exige das máquinas de pequeno porte que se apoiam nos dois trilhos?",
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) Trilho topado deve ser cortado de policorte de qualquer forma;\nB) O uso de policorte é bom sem o bracinho;\nC) O corte com maçarico deve ser iniciado pelo boleto, depois pela alma e por último o patim;\nD) Não é necessário se preocupar com o perfil longitudinal da linha para fazer ATT;\nE) Os pontos de VERSE dentro da faixa da FTN são obrigatórios a execução de ATT;",
           "alternativas": [
             {
               "id": "a",
-              "texto": "Devem possuir isolamento adequado para evitar ocupação de linha/sinalização."
+              "texto": "Sequência: C - E - C - E - E"
             },
             {
               "id": "b",
-              "texto": "Devem sempre trabalhar sem aterramento."
+              "texto": "Sequência: E - E - C - E - E"
             },
             {
               "id": "c",
-              "texto": "Devem ser usadas somente em linhas não sinalizadas."
+              "texto": "Sequência: E - C - C - E - E"
             },
             {
               "id": "d",
-              "texto": "Devem ser operadas exclusivamente por EGP."
+              "texto": "Sequência: E - E - E - E - E"
             },
             {
               "id": "e",
-              "texto": "Devem ser retiradas da via a cada 5 minutos."
+              "texto": "Sequência: E - E - C - C - E"
             }
           ],
-          "correta": "a",
-          "justificativa": "Item 6 — exigência de isolamento adequado."
+          "correta": "b",
+          "justificativa": "Gabarito da planilha: sequência E-E-C-E-E."
         },
         {
           "ordem": 4,
-          "enunciado": "No içamento manual do trilho, qual limite de carga por pessoa deve ser respeitado conforme NR17 citado no procedimento?",
+          "enunciado": "Gráficos do perfil longitudinal para análise:\nGráfico a: [imagem:assets/provas-att4/grafico-a.png]\nGráfico b: [imagem:assets/provas-att4/grafico-b.png]\nGráfico c: [imagem:assets/provas-att4/grafico-c.png]\nGráfico d - com tensor: [imagem:assets/provas-att4/grafico-d.png]\nQual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) O gráfico \"a\" é melhor fazer o processo da meia barra;\nB) O gráfico \"b\" é melhor fazer o processo de meia barra;\nC) O gráfico \"c\" pode ser feito pelos dois processos;\nD) O gráfico \"d\" só pode ser feito pelo metodo da barra inteira;\nE) Todos acima estão errados.",
           "alternativas": [
             {
               "id": "a",
-              "texto": "15 kg por pessoa."
+              "texto": "Sequência: C - C - C - E - E"
             },
             {
               "id": "b",
-              "texto": "18 kg por pessoa."
+              "texto": "Sequência: E - E - C - E - E"
             },
             {
               "id": "c",
-              "texto": "20 kg por pessoa."
+              "texto": "Sequência: E - C - C - E - E"
             },
             {
               "id": "d",
-              "texto": "23 kg por pessoa."
+              "texto": "Sequência: E - C - E - E - E"
             },
             {
               "id": "e",
-              "texto": "30 kg por pessoa."
+              "texto": "Sequência: E - C - C - C - E"
             }
           ],
-          "correta": "d",
-          "justificativa": "Item 6 — limite de 23 kg por pessoa."
+          "correta": "c",
+          "justificativa": "Gabarito da planilha: sequência E-C-C-E-E."
         },
         {
           "ordem": 5,
-          "enunciado": "Para rebatimento de trilho acima de 12 metros de comprimento, o que é obrigatório?",
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) Não precisa se preocupar com o rolete próximo de soldas;\nB) A marreta não precisa ser de bronze ou cobre;\nC) Deve fazer marcações nos trilhos para verificar o caminhamento da barra;\nD) Deve-se colocar a mão embaixo do trilho;\nE) É proibido colocar a mão embaixo do trilho;",
           "alternativas": [
             {
               "id": "a",
-              "texto": "Uso de roletes."
+              "texto": "Sequência: C - E - C - E - C"
             },
             {
               "id": "b",
-              "texto": "Uso de marreta comum no boleto."
+              "texto": "Sequência: E - C - C - E - C"
             },
             {
               "id": "c",
-              "texto": "Execução sem ferramentas para reduzir atrito."
+              "texto": "Sequência: E - E - E - E - C"
             },
             {
               "id": "d",
-              "texto": "Uso de solda de fechamento antes do ATT."
+              "texto": "Sequência: E - E - C - E - C"
             },
             {
               "id": "e",
-              "texto": "Retirada total do lastro."
+              "texto": "Sequência: E - E - C - C - C"
             }
           ],
-          "correta": "a",
-          "justificativa": "Item 6 — rebatimento acima de 12 m exige roletes."
+          "correta": "d",
+          "justificativa": "Gabarito da planilha: sequência E-E-C-E-C."
         },
         {
           "ordem": 6,
-          "enunciado": "Sobre o uso de marreta em trilho, qual alternativa está correta?",
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) O caminhamento da barra deve ser proporcional;\nB) O ideal é aplicar grampos velhos na região da junta após o alívio, pois assim fica muito bom o serviço;\nC) O uso do tensor permite o alívo em qualquer situação entre 10°C a 55°C;\nD) Os roletes devem ser colocados conforme espaçamento do procedimento;\nE) Não deve ser usado rolete travado.",
           "alternativas": [
             {
               "id": "a",
-              "texto": "É proibido usar qualquer marreta em qualquer etapa."
+              "texto": "Sequência: E - E - E - C - C"
             },
             {
               "id": "b",
-              "texto": "É permitido usar marreta comum livremente na região do boleto."
+              "texto": "Sequência: C - C - E - C - C"
             },
             {
               "id": "c",
-              "texto": "É proibido o uso de marreta em trilho, exceto marreta de bronze ou cobre para execução de ATT."
+              "texto": "Sequência: C - E - C - C - C"
             },
             {
               "id": "d",
-              "texto": "A marreta comum é obrigatória para eliminar a ZTA."
+              "texto": "Sequência: C - E - E - E - C"
             },
             {
               "id": "e",
-              "texto": "A marreta só pode ser usada em trilhos curtos de até 12 m."
+              "texto": "Sequência: C - E - E - C - C"
             }
           ],
-          "correta": "c",
-          "justificativa": "Item 6 — proibição e exceção para marreta de bronze/cobre no ATT."
+          "correta": "e",
+          "justificativa": "Gabarito da planilha: sequência C-E-E-C-C."
         },
         {
           "ordem": 7,
-          "enunciado": "Antes de iniciar o corte de trilho, qual distância mínima os funcionários devem manter do local da operação?",
+          "enunciado": "Tabela de ATT para análise: posição 0 m = real 2 / projetado 0; 50 m = real 16 / projetado 15; 100 m = real 29 / projetado 30; 150 m = real 33 / projetado 45; 200 m = real 57 / projetado 60; 250 m = real 74 / projetado 75; 300 m = real 90 / projetado 90.\nAo comparar deslocamento real x projetado, onde possivelmente existe um travamento ou problema?",
           "alternativas": [
             {
               "id": "a",
-              "texto": "5 metros."
+              "texto": "Na posição 0 m, porque o real está 2 mm acima do projetado."
             },
             {
               "id": "b",
-              "texto": "10 metros."
+              "texto": "Na posição 100 m, porque o real está 1 mm abaixo do projetado."
             },
             {
               "id": "c",
-              "texto": "12 metros."
+              "texto": "Na posição 150 m, onde o deslocamento real fica muito abaixo do projetado."
             },
             {
               "id": "d",
-              "texto": "15 metros."
+              "texto": "Na posição 250 m, porque o real está 1 mm abaixo do projetado."
             },
             {
               "id": "e",
-              "texto": "20 metros."
-            }
-          ],
-          "correta": "d",
-          "justificativa": "Item 7 — distância mínima de 15 m antes do corte."
-        },
-        {
-          "ordem": 8,
-          "enunciado": "Em linhas já existentes, quando medições do VERSE identificarem níveis de tensão na faixa Amarela em curva, qual providência o procedimento indica?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Acompanhar somente pelo ronda de linha, sem intervenção."
-            },
-            {
-              "id": "b",
-              "texto": "Efetuar alívio completo de tensão em toda a extensão da curva."
-            },
-            {
-              "id": "c",
-              "texto": "Executar apenas inspeção visual mensal."
-            },
-            {
-              "id": "d",
-              "texto": "Substituir apenas as talas isolantes."
-            },
-            {
-              "id": "e",
-              "texto": "Fazer ATT apenas no primeiro vão de dormente."
-            }
-          ],
-          "correta": "b",
-          "justificativa": "Item 8 — critérios com medições do VERSE."
-        },
-        {
-          "ordem": 9,
-          "enunciado": "Quando o VERSE não acusar medição e as condições de fixação e dormentação estiverem deficientes, o que deve ser recomendado?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Serviço de consolidação da fixação e substituição de dormentes para melhoria do retensionamento."
-            },
-            {
-              "id": "b",
-              "texto": "Execução imediata de solda, sem tratamento da via."
-            },
-            {
-              "id": "c",
-              "texto": "Somente pintura do patim para acompanhar deslocamento."
-            },
-            {
-              "id": "d",
-              "texto": "Liberação automática do trecho sem acompanhamento."
-            },
-            {
-              "id": "e",
-              "texto": "Retirada definitiva do TLS."
-            }
-          ],
-          "correta": "a",
-          "justificativa": "Item 8, alínea b — procedimento quando o VERSE não acusa medição."
-        },
-        {
-          "ordem": 10,
-          "enunciado": "Quando o VERSE não acusar medição, em trechos circulares de curva com raio menor ou igual a 300 m, qual é a orientação?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Acompanhar apenas pelo ronda de linha."
-            },
-            {
-              "id": "b",
-              "texto": "Fazer alívio completo em toda a extensão da curva."
-            },
-            {
-              "id": "c",
-              "texto": "Executar apenas socaria mecanizada."
-            },
-            {
-              "id": "d",
-              "texto": "Não realizar nenhum serviço em curvas desse raio."
-            },
-            {
-              "id": "e",
-              "texto": "Instalar juntas isolantes antes de qualquer análise."
-            }
-          ],
-          "correta": "b",
-          "justificativa": "Item 8, alínea b — curvas com raios ≤ 300 m."
-        }
-      ]
-    },
-    {
-      "codigo": "C",
-      "titulo": "Prova C — Execução do ATT, Roletes, Tensor e Aceitação",
-      "descricao": "Questões sobre execução prática do alívio, controle de temperatura, corte, fixação, roletes, formas natural/artificial, uso de tensor hidráulico e critérios de controle/aceitação.",
-      "nota_minima": 7,
-      "questoes": [
-        {
-          "ordem": 1,
-          "enunciado": "Na execução do ATT, como deve ser feito o controle da temperatura do trilho?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Com termômetro de contato posicionado na alma do trilho, protegido de sol direto, com monitoramento a cada 10 minutos na mesma posição."
-            },
-            {
-              "id": "b",
-              "texto": "Com pirômetro a laser apontado para o boleto, a cada 60 minutos."
-            },
-            {
-              "id": "c",
-              "texto": "Somente pela temperatura ambiente informada pela meteorologia."
-            },
-            {
-              "id": "d",
-              "texto": "Com termômetro de contato no patim, uma única vez antes do corte."
-            },
-            {
-              "id": "e",
-              "texto": "Com qualquer instrumento calibrado, sem posição definida."
-            }
-          ],
-          "correta": "a",
-          "justificativa": "Item 8.1, operação I — controle da temperatura do trilho."
-        },
-        {
-          "ordem": 2,
-          "enunciado": "Em pontos onde o VERSE apontou excesso de trilho, o que o procedimento indica como entendimento para a execução?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Que haverá corte de trilho."
-            },
-            {
-              "id": "b",
-              "texto": "Que a solda de fechamento fica proibida por 30 dias."
-            },
-            {
-              "id": "c",
-              "texto": "Que o trecho deve ser apenas acompanhado pelo ronda."
-            },
-            {
-              "id": "d",
-              "texto": "Que o ATT deve ser executado acima da FTN."
-            },
-            {
-              "id": "e",
-              "texto": "Que não há necessidade de abrir junta."
-            }
-          ],
-          "correta": "a",
-          "justificativa": "Item 8.1, operação II — observação importante sobre excesso de trilho."
-        },
-        {
-          "ordem": 3,
-          "enunciado": "Ao inspecionar trilhos tensionados, quais evidências devem ser procuradas?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Apenas pintura antiga no boleto."
-            },
-            {
-              "id": "b",
-              "texto": "Deslocamentos laterais da grade e marcas de deslocamentos longitudinais, como marcas dos grampos no patim ou deslocamento sobre placas."
-            },
-            {
-              "id": "c",
-              "texto": "Somente desgaste vertical maior que 7 mm."
-            },
-            {
-              "id": "d",
-              "texto": "Apenas presença de junta isolante na mesma linha do sinal."
-            },
-            {
-              "id": "e",
-              "texto": "Somente variação de bitola em tangente."
-            }
-          ],
-          "correta": "b",
-          "justificativa": "Item 8.1 — cuidados com trilhos tensionados."
-        },
-        {
-          "ordem": 4,
-          "enunciado": "Em uma barra tensionada, qual sequência de corte com maçarico é indicada para criar a junta de alívio?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Patim, alma e boleto."
-            },
-            {
-              "id": "b",
-              "texto": "Alma, patim e boleto."
-            },
-            {
-              "id": "c",
-              "texto": "Boleto, alma e patim."
-            },
-            {
-              "id": "d",
-              "texto": "Boleto e patim simultaneamente, sem cortar a alma."
-            },
-            {
-              "id": "e",
-              "texto": "Somente alma, mantendo boleto e patim íntegros."
+              "texto": "Não há nenhum ponto com possível travamento ou problema."
             }
           ],
           "correta": "c",
-          "justificativa": "Item 8.1 — barra tensionada: primeiro boleto, depois alma e por fim patim."
-        },
-        {
-          "ordem": 5,
-          "enunciado": "Após o corte com maçarico em barra tensionada, o que é obrigatório eliminar na barra que permanecerá na linha?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "A ZTA, com 35 mm para cada lado a partir do ponto de corte, usando policorte."
-            },
-            {
-              "id": "b",
-              "texto": "A alma do trilho por 50 mm de cada lado."
-            },
-            {
-              "id": "c",
-              "texto": "Todo o trecho de 12 m de fixação completa."
-            },
-            {
-              "id": "d",
-              "texto": "O boleto por 70 m de cada lado."
-            },
-            {
-              "id": "e",
-              "texto": "A zona neutra integral do TLS."
-            }
-          ],
-          "correta": "a",
-          "justificativa": "Item 8.1 — eliminação da ZTA após corte com maçarico."
-        },
-        {
-          "ordem": 6,
-          "enunciado": "Qual condição mínima de fixação deve existir para cada lado da junta aliviada antes do corte do trilho?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "3 m de fixação completa."
-            },
-            {
-              "id": "b",
-              "texto": "6 m de fixação completa."
-            },
-            {
-              "id": "c",
-              "texto": "9 m de fixação completa."
-            },
-            {
-              "id": "d",
-              "texto": "12 m de fixação completa."
-            },
-            {
-              "id": "e",
-              "texto": "70 m de fixação nova."
-            }
-          ],
-          "correta": "d",
-          "justificativa": "Item 8.1, operação III — mínimo de 12 m de fixação completa para cada lado."
-        },
-        {
-          "ordem": 7,
-          "enunciado": "Qual é a diferença entre a forma natural e a forma artificial/forçada de execução do ATT?",
-          "alternativas": [
-            {
-              "id": "a",
-              "texto": "Natural ocorre dentro da FTN; artificial/forçada ocorre abaixo da FTN com tensor hidráulico tracionando a barra."
-            },
-            {
-              "id": "b",
-              "texto": "Natural ocorre acima da FTN; artificial ocorre sem tensor dentro da FTN."
-            },
-            {
-              "id": "c",
-              "texto": "Natural usa tensor hidráulico; artificial dispensa qualquer rolete."
-            },
-            {
-              "id": "d",
-              "texto": "Natural é apenas para pontes sem lastro; artificial é apenas para túneis."
-            },
-            {
-              "id": "e",
-              "texto": "Não há diferença técnica entre as duas formas."
-            }
-          ],
-          "correta": "a",
-          "justificativa": "Item 8.1.3 — formas de execução do ATT."
+          "justificativa": "Adaptação da questão aberta da planilha para múltipla escolha; maior desvio ocorre em 150 m."
         },
         {
           "ordem": 8,
-          "enunciado": "Para tangentes e curvas com raios maiores que 1000 m, qual quantidade de roletes é indicada?",
+          "enunciado": "Conforme a fôrmula abaixo, qual é o valor do deslocamento esperado? (Marcar com \"X\" a ÚNICA resposta CORRETA)\nL = 300m | α=0,0115°C-1 | TN = 35°C | Temp = 25°C",
           "alternativas": [
             {
               "id": "a",
-              "texto": "Um rolete a cada 4 dormentes."
+              "texto": "51,75mm"
             },
             {
               "id": "b",
-              "texto": "Um rolete a cada 6 dormentes."
+              "texto": "50mm"
             },
             {
               "id": "c",
-              "texto": "Um rolete a cada 8 dormentes."
+              "texto": "20mm"
             },
             {
               "id": "d",
-              "texto": "Um rolete a cada 12 dormentes."
+              "texto": "34,5cm"
             },
             {
               "id": "e",
-              "texto": "Um rolete a cada 20 dormentes."
+              "texto": "34,5mm"
             }
           ],
-          "correta": "d",
-          "justificativa": "Item 8.1.1, letra b — quantidade de roletes."
+          "correta": "e",
+          "justificativa": "Gabarito da planilha: alternativa e."
         },
         {
           "ordem": 9,
-          "enunciado": "Na utilização do tensor hidráulico, qual capacidade mínima de tração é exigida e qual capacidade é considerada ideal?",
+          "enunciado": "Conforme a fôrmula abaixo, qual é o valor do corte e puxamento esperado com uso do Tensor Hidráulico?\nL = 300m | α=0,0115°C-1 | TN = 35°C | Temp = 25°C\nFolga após abertura da Junta = 10mm | Corte = ∆l + Gap da solda - 3mm | *Observação: considedar a folga da junta no corte",
           "alternativas": [
             {
               "id": "a",
-              "texto": "Mínima de 30 t; ideal de 40 t."
+              "texto": "34,5mm de corte e 34,5mm de puxamento"
             },
             {
               "id": "b",
-              "texto": "Mínima de 40 t; ideal de 60 t."
+              "texto": "46,5mm de corte e 21,5mm de puxamento"
             },
             {
               "id": "c",
-              "texto": "Mínima de 60 t; ideal de 80 t."
+              "texto": "56,5mm de corte e 31,5mm de puxamento"
             },
             {
               "id": "d",
-              "texto": "Mínima de 80 t; ideal de 100 t."
+              "texto": "25mm de corte e 10mm de puxamento"
             },
             {
               "id": "e",
-              "texto": "Mínima de 100 t; ideal de 120 t."
+              "texto": "34,5mm de corte e 10mm de puxamento"
             }
           ],
-          "correta": "c",
-          "justificativa": "Item 8.1.3 — utilização do tensor hidráulico."
+          "correta": "b",
+          "justificativa": "Gabarito da planilha: alternativa b."
         },
         {
           "ordem": 10,
-          "enunciado": "Qual é a fórmula do alongamento quando for necessário usar tensor hidráulico?",
+          "enunciado": "Qual é a sequência correta? Use C para afirmação correta e E para afirmação errada.\nA) Quando tivermos um ponto fora do caminhamento devemos ver os roletes;\nB) Quando tivermos um ponto fora do caminhamento devemos ver objetos perto do trilho;\nC) Quando tivermos um ponto fora do caminhamento devemos verificar e rebater novamente;\nD) Quando tivermos um ponto fora do caminhamento devemos entender o que acontece;\nE) Todas acima estão certas.",
           "alternativas": [
             {
               "id": "a",
-              "texto": "ΔL = 0,0115 × L × Δθ."
+              "texto": "Sequência: C - C - C - C - C"
             },
             {
               "id": "b",
-              "texto": "ΔL = L / Δθ."
+              "texto": "Sequência: E - C - C - C - C"
             },
             {
               "id": "c",
-              "texto": "ΔL = 24,7 × S × ΔT / Ro."
+              "texto": "Sequência: C - E - C - C - C"
             },
             {
               "id": "d",
-              "texto": "ΔL = TNR ± 5 °C."
+              "texto": "Sequência: C - C - E - C - C"
             },
             {
               "id": "e",
-              "texto": "ΔL = Tmax − Tmin + 5 °C."
+              "texto": "Sequência: C - C - C - E - C"
             }
           ],
           "correta": "a",
-          "justificativa": "Item 8.1.3 — fórmula de alongamento com tensor hidráulico."
+          "justificativa": "Gabarito da planilha: sequência C-C-C-C-C."
         }
       ]
     }

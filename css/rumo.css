@@ -890,3 +890,7 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: .9rem; backgro
 @media (max-width: 560px) {
   .dashboard-filtros__grid { grid-template-columns: 1fr; }
 }
+
+.questao__enunciado { white-space: normal; }
+.questao-midia { display: block; margin: .75rem 0 1rem; }
+.questao-midia img { display: block; max-width: min(100%, 680px); border: 1px solid var(--borda); border-radius: var(--rumo-raio-sm); background: #fff; box-shadow: var(--sombra-card); }

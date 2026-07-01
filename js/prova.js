@@ -162,6 +162,28 @@ async function iniciarProva() {
   renderExecucao();
 }
 
+
+function renderTextoQuestao(texto) {
+  const raw = String(texto || "");
+  const partes = [];
+  const re = /\[imagem:([^\]\s]+)\]/g;
+  let ultimo = 0;
+  let m;
+  while ((m = re.exec(raw)) !== null) {
+    partes.push(escaparHtml(raw.slice(ultimo, m.index)).replace(/\n/g, "<br>"));
+    const src = m[1];
+    if (/^assets\/provas-att4\/[a-z0-9_.-]+\.png$/i.test(src)) {
+      const nome = src.split("/").pop().replace(/\.png$/i, "").replace(/-/g, " ");
+      partes.push(`<span class="questao-midia"><img src="${src}" alt="${escaparHtml(nome)}" loading="lazy" /></span>`);
+    } else {
+      partes.push(escaparHtml(m[0]));
+    }
+    ultimo = re.lastIndex;
+  }
+  partes.push(escaparHtml(raw.slice(ultimo)).replace(/\n/g, "<br>"));
+  return partes.join("");
+}
+
 function renderExecucao() {
   mostrarTela("prova");
   const host = document.querySelector("[data-tela='prova']");
@@ -176,7 +198,7 @@ function renderExecucao() {
       </label>`).join("");
     return `
       <article class="questao" data-questao-card="${q.id}">
-        <p class="questao__enunciado"><span class="questao__num">${idx + 1}</span>${escaparHtml(q.enunciado)}</p>
+        <p class="questao__enunciado"><span class="questao__num">${idx + 1}</span>${renderTextoQuestao(q.enunciado)}</p>
         <div class="alts">${alts}</div>
       </article>`;
   }).join("");
@@ -274,7 +296,7 @@ function renderResultado(t) {
       return `<div class="${cls}"><span class="alt__key">${a.id})</span><span>${escaparHtml(a.texto)}</span>${tag}</div>`;
     }).join("");
     return `<article class="questao">
-      <p class="questao__enunciado"><span class="questao__num">${idx + 1}</span>${escaparHtml(q.enunciado)}</p>
+      <p class="questao__enunciado"><span class="questao__num">${idx + 1}</span>${renderTextoQuestao(q.enunciado)}</p>
       <div class="alts">${alts}</div></article>`;
   }).join("");
 

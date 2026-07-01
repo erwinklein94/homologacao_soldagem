@@ -34,11 +34,10 @@ async function gerarCertificadoPDF(d) {
   const W = doc.internal.pageSize.getWidth();   // ~297
   const H = doc.internal.pageSize.getHeight();  // ~210
   const aprovado = !!d.aprovado;
-  const areaId = d.area || "solda";
-  const tema = areaId === "alivio_tensao" ? "Alívio de Tensões Térmicas em Trilhos" : "Soldagem Aluminotérmica de Trilhos";
-  const procedimento = areaId === "alivio_tensao" ? "MAN-VP-L-PRO-TR-0036-01" : "MAN-VP-T-PRO-SO-0001";
-  const avaliacao = areaId === "alivio_tensao" ? "avaliação teórica de alívio de tensões térmicas em trilhos" : "avaliação teórica de soldagem aluminotérmica";
-  const portal = areaId === "alivio_tensao" ? "Homologação Alívio de Tensão" : "Homologação de Soldagem Aluminotérmica";
+  const tema = "Soldagem Aluminotérmica de Trilhos";
+  const procedimento = "MAN-VP-T-PRO-SO-0001";
+  const avaliacao = "avaliação teórica de soldagem aluminotérmica";
+  const portal = "Homologação de Soldagem Aluminotérmica";
 
   // Moldura
   doc.setDrawColor(...RGB.azul);

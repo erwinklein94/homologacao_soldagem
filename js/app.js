@@ -8,8 +8,7 @@
 function criarCliente() {
   const cfg = window.SUPABASE_CONFIG || {};
   const url = cfg.url || "";
-  // Aceita a nova chave "publishable" (sb_publishable_...) e, por compatibilidade,
-  // o nome antigo "anonKey". Ambas são seguras no navegador (o RLS protege os dados).
+  // A chave "publishable" (sb_publishable_...) é pública; o RLS protege os dados.
   const key = cfg.publishableKey || cfg.anonKey || "";
   if (!url || url.includes("SEU-PROJETO") || !key || key.includes("COLE-AQUI")) {
     return null; // ainda não configurado
@@ -19,6 +18,8 @@ function criarCliente() {
 const sb = criarCliente();
 window.sb = sb;
 
+// Este site atende UMA área de homologação (repositório dedicado).
+const AREA_FIXA = "solda";
 const AREAS_HOMOLOGACAO = {
   solda: {
     id: "solda",
@@ -28,80 +29,24 @@ const AREAS_HOMOLOGACAO = {
     descricao: "Ambiente interno para avaliação, homologação e acompanhamento de soldadores em Soldagem Aluminotérmica de Trilhos.",
     rodape: "Rumo · Uso interno — Homologação de Soldagem Aluminotérmica",
   },
-  alivio_tensao: {
-    id: "alivio_tensao",
-    titulo: "Homologação Alívio de Tensão",
-    subtitulo: "Alívio de Tensão",
-    alunoLabel: "Aluno",
-    descricao: "Ambiente interno para avaliação, homologação e acompanhamento de alunos em Alívio de Tensão.",
-    rodape: "Rumo · Uso interno — Homologação Alívio de Tensão",
-  },
 };
-
-// Treinamentos (sub-áreas) dentro de Alívio de Tensão.
-// As provas e tentativas de alivio_tensao pertencem a um destes treinamentos.
-const SUBAREAS_ALIVIO = {
-  alivio_termico: { id: "alivio_termico", nome: "Alívio de tensão térmica" },
-  prospeccao_trilhos: { id: "prospeccao_trilhos", nome: "Prospecção de trilhos" },
-  operacao_verse: { id: "operacao_verse", nome: "Operação com verse" },
-  temperaturas_neutras: { id: "temperaturas_neutras", nome: "Temperaturas neutras" },
-};
-const SUBAREA_PADRAO = "alivio_termico";
-
-function subareaValida(sub) {
-  return Object.prototype.hasOwnProperty.call(SUBAREAS_ALIVIO, sub);
-}
-
-function getSubareaEscolhida() {
-  const salva = localStorage.getItem("homologacao_subarea");
-  return subareaValida(salva) ? salva : SUBAREA_PADRAO;
-}
-
-function setSubareaEscolhida(sub) {
-  if (subareaValida(sub)) localStorage.setItem("homologacao_subarea", sub);
-}
-
-function getSubareaMeta(sub) {
-  return SUBAREAS_ALIVIO[sub] || SUBAREAS_ALIVIO[SUBAREA_PADRAO];
-}
-
-window.SUBAREAS_ALIVIO = SUBAREAS_ALIVIO;
-window.getSubareaEscolhida = getSubareaEscolhida;
-window.setSubareaEscolhida = setSubareaEscolhida;
-window.getSubareaMeta = getSubareaMeta;
-
-// Classifica um registro (prova/tentativa) de alivio_tensao pelo treinamento.
-// Registros antigos sem coluna preenchida contam como Alívio de tensão térmica.
-function subareaDoRegistro(r) {
-  return subareaValida(r?.subarea) ? r.subarea : SUBAREA_PADRAO;
-}
-window.subareaDoRegistro = subareaDoRegistro;
 
 function areaValida(area) {
-  return Object.prototype.hasOwnProperty.call(AREAS_HOMOLOGACAO, area);
+  return area === AREA_FIXA;
 }
 
 function getAreaEscolhida() {
-  const params = new URLSearchParams(window.location.search);
-  const pelaUrl = params.get("area");
-  if (areaValida(pelaUrl)) {
-    localStorage.setItem("homologacao_area", pelaUrl);
-    return pelaUrl;
-  }
-  const salva = localStorage.getItem("homologacao_area");
-  return areaValida(salva) ? salva : null;
+  return AREA_FIXA;
 }
 
-function setAreaEscolhida(area) {
-  if (areaValida(area)) localStorage.setItem("homologacao_area", area);
+function setAreaEscolhida() { /* área fixa neste repositório */ }
+
+function getAreaMeta() {
+  return AREAS_HOMOLOGACAO[AREA_FIXA];
 }
 
-function getAreaMeta(area) {
-  return AREAS_HOMOLOGACAO[area] || AREAS_HOMOLOGACAO.solda;
-}
-
-function urlLoginArea(area) {
-  return areaValida(area) ? `login.html?area=${encodeURIComponent(area)}` : "index.html";
+function urlLoginArea() {
+  return "login.html";
 }
 
 window.AREAS_HOMOLOGACAO = AREAS_HOMOLOGACAO;
@@ -119,8 +64,8 @@ function exigeConfig() {
   box.style.maxWidth = "680px";
   box.innerHTML =
     "<div><b>Falta configurar o Supabase.</b><br>" +
-    "Abra <code>js/config.js</code> e preencha <code>url</code> e <code>anonKey</code> " +
-    "com os dados do seu projeto (Project Settings &gt; API). Depois recarregue a página.</div>";
+    "Abra <code>js/config.js</code> e preencha <code>url</code> e <code>publishableKey</code> " +
+    "com os dados do projeto (Supabase &gt; Project Settings &gt; API Keys). Depois recarregue a página.</div>";
   alvo.prepend(box);
   return false;
 }
@@ -244,21 +189,6 @@ function montarCabecalho(perfil) {
     ? '<span class="badge-role badge-role--admin">Administrador</span>'
     : '<span class="badge-role">Aluno</span>';
 
-  // Menu de treinamentos: só para o administrador de Alívio de Tensão.
-  // Define qual treinamento os painéis, o histórico e o editor de provas mostram.
-  const mostrarSubareas = ehAdmin && perfil.area === "alivio_tensao";
-  const subAtual = getSubareaEscolhida();
-  const subnav = mostrarSubareas
-    ? `<div class="subnav" aria-label="Treinamentos de Alívio de Tensão">
-        <div class="subnav__inner">
-          <span class="subnav__label">Treinamento:</span>
-          ${Object.values(SUBAREAS_ALIVIO).map((s) =>
-            `<button type="button" data-subarea-btn="${s.id}"${s.id === subAtual ? ' class="is-active"' : ""}>${escaparHtml(s.nome)}</button>`
-          ).join("")}
-        </div>
-      </div>`
-    : "";
-
   host.innerHTML = `
     <div class="topbar__inner">
       <a class="brand" href="${ehAdmin ? "dashboard.html" : "prova.html"}">
@@ -274,15 +204,9 @@ function montarCabecalho(perfil) {
         </div>
         <button class="btn btn--ghost btn--sm" data-sair>Sair</button>
       </div>
-    </div>${subnav}`;
+    </div>`;
 
   host.querySelector("[data-sair]").addEventListener("click", sair);
-  host.querySelectorAll("[data-subarea-btn]").forEach((b) =>
-    b.addEventListener("click", () => {
-      if (b.dataset.subareaBtn === getSubareaEscolhida()) return;
-      setSubareaEscolhida(b.dataset.subareaBtn);
-      window.location.reload();
-    }));
 }
 window.montarCabecalho = montarCabecalho;
 

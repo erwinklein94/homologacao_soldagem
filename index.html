@@ -3,54 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Homologações · Rumo</title>
-  <meta name="description" content="Entrada por área para as homologações Rumo." />
+  <title>Homologação de Solda · Rumo</title>
+  <meta name="description" content="Entrada da Homologação de Solda." />
   <link rel="icon" href="assets/favicon.png" />
-  <link rel="stylesheet" href="css/rumo.css?v=20260626-areas-v1" />
+  <!-- Este site atende só esta área; a entrada vai direto para o login. -->
+  <meta http-equiv="refresh" content="0; url=login.html" />
+  <script>window.location.replace("login.html");</script>
 </head>
 <body>
-  <div class="login-shell">
-    <main class="login-hero" aria-labelledby="areaTitulo">
-      <div class="login-box area-box">
-        <section class="login-intro">
-          <div class="login-marca">
-            <img src="assets/rumo-logo-azul.png" alt="Rumo" />
-          </div>
-          <div class="login-kicker">Somos o Brasil em movimento</div>
-          <h1 id="areaTitulo">Escolha a área de homologação</h1>
-          <p>Os acessos são separados por área. Alunos e administradores de uma homologação não acessam os dados da outra.</p>
-        </section>
-
-        <section class="login-acesso" aria-label="Áreas disponíveis">
-          <div class="area-cards">
-            <a class="area-card" href="login.html?area=solda" data-area-link="solda">
-              <span class="area-card__sigla">HS</span>
-              <span>
-                <strong>Homologação de Solda</strong>
-                <small>Soldagem aluminotérmica de trilhos</small>
-              </span>
-            </a>
-
-            <a class="area-card area-card--tensao" href="login.html?area=alivio_tensao" data-area-link="alivio_tensao">
-              <span class="area-card__sigla">AT</span>
-              <span>
-                <strong>Homologação Alívio de Tensão</strong>
-                <small>Alívio de tensões térmicas em trilhos</small>
-              </span>
-            </a>
-          </div>
-        </section>
-      </div>
-    </main>
-    <footer class="login-foot">Rumo · Uso interno — Homologações</footer>
-  </div>
-
-  <script>
-    document.querySelectorAll("[data-area-link]").forEach((link) => {
-      link.addEventListener("click", () => {
-        localStorage.setItem("homologacao_area", link.dataset.areaLink);
-      });
-    });
-  </script>
+  <p style="font-family:sans-serif;padding:2rem">Redirecionando para o <a href="login.html">login</a>…</p>
 </body>
 </html>

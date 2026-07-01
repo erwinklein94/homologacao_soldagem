@@ -119,28 +119,6 @@ a  { color: var(--rumo-azul-claro); }
 .nav a:hover { background: rgba(255,255,255,.10); color: #fff; }
 .nav a.is-active { background: #fff; color: var(--rumo-azul); }
 
-/* Menu de treinamentos (sub-áreas) — Alívio de Tensão, visão do administrador */
-.subnav {
-  background: rgba(0,0,0,.18);
-  border-top: 1px solid rgba(255,255,255,.14);
-}
-.subnav__inner {
-  max-width: 1160px; margin: 0 auto; padding: .45rem 1.1rem;
-  display: flex; align-items: center; gap: .35rem; flex-wrap: wrap;
-}
-.subnav__label {
-  color: var(--rumo-verde-claro); font-size: .72rem; font-weight: 700;
-  letter-spacing: .05em; text-transform: uppercase; margin-right: .3rem;
-}
-.subnav button {
-  border: 1px solid rgba(255,255,255,.25); background: transparent;
-  color: rgba(255,255,255,.88); font: inherit; font-weight: 600; font-size: .84rem;
-  padding: .35rem .75rem; border-radius: var(--rumo-raio-sm); cursor: pointer;
-  transition: background var(--rumo-transicao), color var(--rumo-transicao);
-}
-.subnav button:hover { background: rgba(255,255,255,.12); color: #fff; }
-.subnav button.is-active { background: #fff; border-color: #fff; color: var(--rumo-azul); }
-
 .user-chip { display: flex; align-items: center; gap: .6rem; padding-left: .5rem; }
 .user-chip__name { font-size: .86rem; line-height: 1.15; text-align: right; }
 .user-chip__name b { display: block; font-weight: 700; }

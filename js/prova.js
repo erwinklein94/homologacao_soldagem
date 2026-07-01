@@ -58,35 +58,16 @@ function renderInicio() {
     return;
   }
 
-  const ehAlivio = estado.perfil.area === "alivio_tensao";
-  let opcoesProva;
-  if (ehAlivio) {
-    // Agrupa as provas pelos 4 treinamentos de Alívio de Tensão.
-    let primeira = true;
-    opcoesProva = Object.values(window.SUBAREAS_ALIVIO).map((s) => {
-      const doGrupo = estado.provas.filter((p) => subareaDoRegistro(p) === s.id);
-      if (!doGrupo.length) return "";
-      const opts = doGrupo.map((p) => {
-        const sel = primeira ? " selected" : "";
-        primeira = false;
-        return `<option value="${p.id}"${sel}>${escaparHtml(p.titulo)}</option>`;
-      }).join("");
-      return `<optgroup label="${escaparHtml(s.nome)}">${opts}</optgroup>`;
-    }).join("");
-  } else {
-    opcoesProva = estado.provas
-      .map((p, i) => `<option value="${p.id}"${i === 0 ? " selected" : ""}>${escaparHtml(p.titulo)}</option>`)
-      .join("");
-  }
+  const opcoesProva = estado.provas
+    .map((p, i) => `<option value="${p.id}"${i === 0 ? " selected" : ""}>${escaparHtml(p.titulo)}</option>`)
+    .join("");
 
   const opcoesInstrutor = estado.instrutores
     .map((a) => `<option value="${a.id}">${escaparHtml(a.nome)}</option>`)
     .join("") + `<option value="__outro">Outro (digitar)…</option>`;
 
   const area = window.getAreaMeta ? window.getAreaMeta(estado.perfil.area) : null;
-  const tituloArea = estado.perfil.area === "alivio_tensao"
-    ? "Alívio de Tensão em Trilhos"
-    : "Soldagem aluminotérmica de trilhos";
+  const tituloArea = "Soldagem aluminotérmica de trilhos";
   document.title = `Prova · ${area?.titulo || tituloArea} · Rumo`;
 
   host.innerHTML = `
@@ -283,8 +264,6 @@ async function enviarProva() {
     nota, acertos, total, aprovado,
     respostas: estado.respostas,
   };
-  // Em Alívio de Tensão, a tentativa herda o treinamento da prova.
-  if (estado.perfil.area === "alivio_tensao") registro.subarea = subareaDoRegistro(estado.prova);
 
   const btn = document.querySelector("[data-enviar]");
   travarBtn(btn, true, "Registrando…");

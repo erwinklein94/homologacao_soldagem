@@ -7,10 +7,8 @@
 
 const adm = {
   perfil: null,
-  subarea: null,       // treinamento selecionado (só em alivio_tensao)
   provas: [],          // lista de provas (id, codigo, titulo, ...)
   tentativas: [],      // todas as tentativas (admin enxerga tudo via RLS)
-  historico: [],       // histórico legado de Alívio de Tensão (tabela historico_alivio_tensao)
   provaSel: null,      // prova aberta no editor
   questoes: [],        // questões da prova aberta (estado editável em memória)
 };
@@ -19,20 +17,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const perfil = await protegerPagina({ requerAdmin: true });
   if (!perfil) return;
   adm.perfil = perfil;
-  adm.subarea = perfil.area === "alivio_tensao" ? getSubareaEscolhida() : null;
-
-  if (adm.subarea) {
-    const titulo = document.querySelector(".page__head h1");
-    if (titulo) titulo.textContent = `Dados & provas — ${getSubareaMeta(adm.subarea).nome}`;
-  }
 
   ligarAbas();
-  await Promise.all([carregarProvas(), carregarTentativas(), carregarHistoricoAlivio()]);
+  await Promise.all([carregarProvas(), carregarTentativas()]);
 
   conferirSeed();
   renderAtividades();
   renderListaProvas();
-  configurarHistorico();
 });
 
 // --------------------------------------------------------------- carga
@@ -43,8 +34,7 @@ async function carregarProvas() {
     .eq("area", adm.perfil.area)
     .order("codigo");
   if (error) { console.error(error); adm.provas = []; return; }
-  // Em Alívio de Tensão, mostra só as provas do treinamento selecionado.
-  adm.provas = (data || []).filter((p) => !adm.subarea || subareaDoRegistro(p) === adm.subarea);
+  adm.provas = data || [];
 }
 
 async function carregarTentativas() {
@@ -54,36 +44,7 @@ async function carregarTentativas() {
     .eq("area", adm.perfil.area)
     .order("realizado_em", { ascending: false });
   if (error) { console.error(error); adm.tentativas = []; return; }
-  adm.tentativas = (data || []).filter((t) => !adm.subarea || subareaDoRegistro(t) === adm.subarea);
-}
-
-// Histórico legado importado da planilha, agora servido pelo Supabase.
-// Existe apenas na área de Alívio de Tensão (tabela public.historico_alivio_tensao).
-async function carregarHistoricoAlivio() {
-  // O histórico da planilha é de ATT (Alívio de Tensão Térmica); os demais
-  // treinamentos começam sem legado e mostram só as provas do sistema.
-  if (adm.perfil?.area !== "alivio_tensao" || adm.subarea !== "alivio_termico") { adm.historico = []; return; }
-
-  // Remove do banco os registros legados sem nota, conforme solicitado.
-  // Se a tabela ainda não existir, o erro será tratado no SELECT abaixo e o snapshot local será usado.
-  await sb.from("historico_alivio_tensao").delete().is("nota", null);
-
-  const { data, error } = await sb
-    .from("historico_alivio_tensao")
-    .select("*")
-    .not("nota", "is", null)
-    .order("data_inicio", { ascending: false });
-  if (error) {
-    // Tabela ainda não criada no Supabase → usa o snapshot embutido como fallback
-    // (js/historico-alivio-tensao.js). Rode sql/historico-alivio-tensao.sql para usar o banco.
-    console.warn("Histórico via Supabase indisponível, usando snapshot local:", error.message);
-    adm.historico = (window.HISTORICO_ALIVIO_TENSAO || []).filter((r) => r.nota !== null && r.nota !== undefined && r.nota !== "");
-    return;
-  }
-  // O PostgREST pode devolver numeric como texto; garante nota numérica e mantém apenas registros com nota.
-  adm.historico = (data || [])
-    .map((r) => ({ ...r, nota: (r.nota === null || r.nota === undefined || r.nota === "") ? null : Number(r.nota) }))
-    .filter((r) => typeof r.nota === "number" && !isNaN(r.nota));
+  adm.tentativas = data || [];
 }
 
 // --------------------------------------------------------------- abas
@@ -183,216 +144,10 @@ function desenharTabelaAtividades(fAluno, fProva, fResult) {
 }
 
 // =====================================================================
-// 1b) HISTÓRICO — somente Alívio de Tensão
-// Reúne o histórico legado importado da planilha (window.HISTORICO_ALIVIO_TENSAO)
-// com as provas novas aplicadas pelos fiscais aqui no sistema (adm.tentativas).
-// =====================================================================
-function configurarHistorico() {
-  if (adm.perfil?.area !== "alivio_tensao") return;   // aba existe só nesta área
-  const btn = document.querySelector("[data-aba-historico-btn]");
-  if (btn) btn.classList.remove("hidden");
-  renderHistorico();
-}
-
-// Converte uma tentativa do sistema para o mesmo formato do histórico da planilha.
-function tentativaParaHistorico(t) {
-  return {
-    especificacao: t.prova_titulo || "—",
-    modalidade: "—",
-    categoria: "—",
-    data_inicio: t.realizado_em || null,
-    data_fim: t.realizado_em || null,
-    carga_horaria: "—",
-    local: "—",
-    gerencia: "—",
-    participante: t.aluno_nome || "—",
-    funcao: "—",
-    matricula: "—",
-    empresa: "—",
-    nota: (t.nota === null || t.nota === undefined) ? null : Number(t.nota),
-    aprovacao: t.aprovado ? "APROVADO" : "REPROVADO",
-    instrutor: t.instrutor_nome || "—",
-    origem: "Sistema",
-  };
-}
-
-function montarHistoricoCompleto() {
-  const legado = (adm.historico || []).map((r) => ({
-    ...r, instrutor: "—", origem: "Planilha",
-  }));
-  const doSistema = adm.tentativas.map(tentativaParaHistorico);
-  const todos = legado.concat(doSistema);
-  // Mais recentes primeiro (datas em ISO comparam corretamente como texto).
-  todos.sort((a, b) => String(b.data_inicio || "").localeCompare(String(a.data_inicio || "")));
-  return todos;
-}
-
-// dd/mm/aaaa sem depender de fuso (as datas legadas são só data, sem hora).
-function fmtDataHist(v) {
-  if (!v) return "—";
-  const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return m ? `${m[3]}/${m[2]}/${m[1]}` : fmtData(v, false);
-}
-
-function renderHistorico() {
-  const host = document.querySelector("[data-historico]");
-  if (!host) return;
-  const dados = montarHistoricoCompleto();
-
-  // Empresas (deduplicadas por maiúsculas) para o filtro.
-  const empresasMap = new Map();
-  dados.forEach((r) => {
-    const e = (r.empresa || "").trim();
-    if (e && e !== "—") { const u = e.toUpperCase(); if (!empresasMap.has(u)) empresasMap.set(u, u); }
-  });
-  const opcoesEmpresa = ['<option value="">Todas as empresas</option>']
-    .concat([...empresasMap.keys()].sort().map((e) => `<option value="${escaparHtml(e)}">${escaparHtml(e)}</option>`))
-    .join("");
-
-  host.innerHTML = `
-    <div class="card stack">
-      <div>
-        <p class="muted" style="margin:0 0 1rem">
-          Histórico do treinamento <b>${escaparHtml(getSubareaMeta(adm.subarea).nome)}</b>: os registros importados da planilha
-          (quando existirem) e as provas aplicadas pelos fiscais aqui no sistema, reunidos em um só lugar.
-        </p>
-        <div class="kpis" data-hist-kpis></div>
-      </div>
-
-      <div class="toolbar">
-        <div class="field" style="margin:0;flex:1;min-width:200px">
-          <label for="h-part">Buscar participante</label>
-          <input id="h-part" class="input" placeholder="Nome do participante…" data-h-part />
-        </div>
-        <div class="field" style="margin:0;min-width:190px">
-          <label for="h-empresa">Empresa</label>
-          <select id="h-empresa" class="select" data-h-empresa>${opcoesEmpresa}</select>
-        </div>
-        <div class="field" style="margin:0;min-width:150px">
-          <label for="h-modalidade">Modalidade</label>
-          <select id="h-modalidade" class="select" data-h-modalidade>
-            <option value="">Todas</option>
-            <option value="TEÓRICO">Teórico</option>
-            <option value="PRÁTICO">Prático</option>
-          </select>
-        </div>
-        <div class="field" style="margin:0;min-width:160px">
-          <label for="h-result">Resultado</label>
-          <select id="h-result" class="select" data-h-result>
-            <option value="">Todos</option>
-            <option value="ok">Aprovados</option>
-            <option value="reprov">Reprovados</option>
-          </select>
-        </div>
-        <div class="field" style="margin:0;min-width:170px">
-          <label for="h-origem">Origem</label>
-          <select id="h-origem" class="select" data-h-origem>
-            <option value="">Todas</option>
-            <option value="Planilha">Planilha histórica</option>
-            <option value="Sistema">Sistema</option>
-          </select>
-        </div>
-      </div>
-      <div data-hist-tabela></div>
-    </div>`;
-
-  const aplicar = () => desenharTabelaHistorico(dados, {
-    part: host.querySelector("[data-h-part]").value.trim().toLowerCase(),
-    empresa: host.querySelector("[data-h-empresa]").value,
-    modalidade: host.querySelector("[data-h-modalidade]").value,
-    result: host.querySelector("[data-h-result]").value,
-    origem: host.querySelector("[data-h-origem]").value,
-  });
-  host.querySelector("[data-h-part]").addEventListener("input", aplicar);
-  host.querySelector("[data-h-empresa]").addEventListener("change", aplicar);
-  host.querySelector("[data-h-modalidade]").addEventListener("change", aplicar);
-  host.querySelector("[data-h-result]").addEventListener("change", aplicar);
-  host.querySelector("[data-h-origem]").addEventListener("change", aplicar);
-  aplicar();
-}
-
-function desenharTabelaHistorico(dados, f) {
-  const linhas = dados.filter((r) => {
-    if (f.part && !(r.participante || "").toLowerCase().includes(f.part)) return false;
-    if (f.empresa && (r.empresa || "").toUpperCase() !== f.empresa) return false;
-    if (f.modalidade && (r.modalidade || "").toUpperCase() !== f.modalidade) return false;
-    if (f.result === "ok" && r.aprovacao !== "APROVADO") return false;
-    if (f.result === "reprov" && r.aprovacao !== "REPROVADO") return false;
-    if (f.origem && r.origem !== f.origem) return false;
-    return true;
-  });
-
-  // KPIs sobre o recorte filtrado.
-  const kpis = document.querySelector("[data-hist-kpis]");
-  if (kpis) {
-    const notas = linhas.map((r) => r.nota).filter((n) => typeof n === "number" && !isNaN(n));
-    const aprov = linhas.filter((r) => r.aprovacao === "APROVADO").length;
-    const reprov = linhas.filter((r) => r.aprovacao === "REPROVADO").length;
-    const media = notas.length ? notas.reduce((a, b) => a + b, 0) / notas.length : null;
-    kpis.innerHTML = `
-      <div class="kpi"><div class="kpi__label">Registros</div><div class="kpi__value">${linhas.length}</div></div>
-      <div class="kpi kpi--verde"><div class="kpi__label">Aprovados</div><div class="kpi__value">${aprov}</div></div>
-      <div class="kpi"><div class="kpi__label">Reprovados</div><div class="kpi__value">${reprov}</div></div>
-      <div class="kpi"><div class="kpi__label">Média das notas</div><div class="kpi__value">${media === null ? "—" : fmtNota(media)}</div><div class="kpi__sub">${notas.length} com nota lançada</div></div>`;
-  }
-
-  const host = document.querySelector("[data-hist-tabela]");
-  if (linhas.length === 0) {
-    host.innerHTML = `<p class="muted center" style="padding:1.4rem 0">Nenhum registro encontrado com esses filtros.</p>`;
-    return;
-  }
-
-  const corpo = linhas.map((r) => {
-    const badgeRes =
-      r.aprovacao === "APROVADO" ? '<span class="badge badge--ok badge--dot">Aprovado</span>' :
-      r.aprovacao === "REPROVADO" ? '<span class="badge badge--erro badge--dot">Reprovado</span>' :
-      '<span class="badge badge--dot">—</span>';
-    const badgeOrig = r.origem === "Sistema"
-      ? '<span class="badge badge--ok badge--dot">Sistema</span>'
-      : '<span class="badge badge--dot">Planilha</span>';
-    const nota = (typeof r.nota === "number" && !isNaN(r.nota)) ? `<b>${fmtNota(r.nota)}</b>` : '<span class="muted">—</span>';
-    const modalidade = r.modalidade && r.modalidade !== "—"
-      ? r.modalidade.charAt(0) + r.modalidade.slice(1).toLowerCase() : "—";
-    return `<tr>
-      <td class="nowrap">${fmtDataHist(r.data_inicio)}</td>
-      <td>${escaparHtml(r.participante)}</td>
-      <td>${escaparHtml(r.funcao || "—")}</td>
-      <td>${escaparHtml(r.empresa || "—")}</td>
-      <td class="nowrap">${escaparHtml(r.matricula || "—")}</td>
-      <td>${escaparHtml(r.local || "—")}</td>
-      <td>${escaparHtml(r.gerencia || "—")}</td>
-      <td>${escaparHtml(modalidade)}</td>
-      <td>${escaparHtml(r.instrutor || "—")}</td>
-      <td class="nowrap">${nota}</td>
-      <td>${badgeRes}</td>
-      <td>${badgeOrig}</td>
-    </tr>`;
-  }).join("");
-
-  host.innerHTML = `
-    <p class="muted small" style="margin:.2rem 0 .6rem">${linhas.length} registro(s)</p>
-    <div class="tabela-wrap">
-      <table class="tabela">
-        <thead><tr>
-          <th>Data</th><th>Participante</th><th>Função</th><th>Empresa</th>
-          <th>Matrícula/CPF</th><th>Local</th><th>Gerência</th><th>Modalidade</th>
-          <th>Instrutor/Fiscal</th><th>Nota</th><th>Resultado</th><th>Origem</th>
-        </tr></thead>
-        <tbody>${corpo}</tbody>
-      </table>
-    </div>`;
-}
-
-// =====================================================================
 // 2) PROVAS & QUESTÕES (editor)
 // =====================================================================
 function obterSeedArea() {
-  let seeds = [];
-  if (typeof window.getProvasSeed === "function") seeds = window.getProvasSeed(adm.perfil?.area) || [];
-  else if (window.PROVAS_SEEDS && Array.isArray(window.PROVAS_SEEDS[adm.perfil?.area])) seeds = window.PROVAS_SEEDS[adm.perfil.area];
-  else if (Array.isArray(window.PROVAS_SEED)) seeds = window.PROVAS_SEED;
-  // Em Alívio de Tensão, só oferece as provas padrão do treinamento selecionado.
-  return seeds.filter((p) => !adm.subarea || subareaDoRegistro(p) === adm.subarea);
+  return Array.isArray(window.PROVAS_SEED) ? window.PROVAS_SEED : [];
 }
 
 function nomeAreaAtual() {
@@ -431,16 +186,13 @@ async function carregarSeed(e, opcoes = {}) {
   travarBtn(btn, true, substituirArea ? "Substituindo…" : "Carregando…");
   try {
     if (substituirArea) {
-      let del = sb.from("provas").delete().eq("area", adm.perfil.area);
-      if (adm.subarea) del = del.eq("subarea", adm.subarea); // não apaga provas dos outros treinamentos
-      const { error: e0 } = await del;
+      const { error: e0 } = await sb.from("provas").delete().eq("area", adm.perfil.area);
       if (e0) throw e0;
     }
 
     for (const p of seedArea) {
       // Cria/atualiza a prova pelo código (único por área) e devolve o id.
       const registroProva = { area: adm.perfil.area, codigo: p.codigo, titulo: p.titulo, descricao: p.descricao, nota_minima: p.nota_minima, ativo: true, atualizado_em: new Date().toISOString() };
-      if (adm.subarea) registroProva.subarea = p.subarea || adm.subarea;
       const { data: prova, error: e1 } = await sb
         .from("provas")
         .upsert(registroProva, { onConflict: "area,codigo" })
@@ -497,7 +249,6 @@ function renderListaProvas() {
       <div class="toolbar">
         <h2 style="margin:0">Provas cadastradas</h2>
         <span class="spacer"></span>
-        ${adm.perfil?.area === "alivio_tensao" && obterSeedArea().length ? '<button class="btn btn--ghost btn--sm" data-reset-seed>Substituir provas do treinamento</button>' : ''}
         <button class="btn btn--ghost btn--sm" data-nova-prova>+ Nova prova</button>
       </div>
       ${cards}
@@ -506,24 +257,15 @@ function renderListaProvas() {
 
   host.querySelectorAll("[data-editar]").forEach((b) =>
     b.addEventListener("click", () => abrirEditor(b.dataset.editar)));
-  const btnReset = host.querySelector("[data-reset-seed]");
-  if (btnReset) {
-    btnReset.addEventListener("click", (evt) => {
-      const qtd = obterSeedArea().length;
-      const ok = confirm(`Isso vai excluir as provas atuais do treinamento "${getSubareaMeta(adm.subarea).nome}" e carregar ${qtd} prova(s) padrão. As provas dos outros treinamentos e o histórico de tentativas já realizadas serão mantidos. Deseja continuar?`);
-      if (ok) carregarSeed(evt, { substituirArea: true });
-    });
-  }
   host.querySelector("[data-nova-prova]").addEventListener("click", criarProvaVazia);
 }
 
 async function criarProvaVazia() {
-  const titulo = prompt("Título da nova prova:", adm.perfil?.area === "alivio_tensao" ? `Nova prova de ${getSubareaMeta(adm.subarea).nome.toLowerCase()}` : "Nova prova de soldagem");
+  const titulo = prompt("Título da nova prova:", "Nova prova de soldagem");
   if (!titulo) return;
   const codigo = prompt("Código curto e único (ex.: D):", "");
   if (!codigo) return;
   const registro = { area: adm.perfil.area, codigo: codigo.trim(), titulo: titulo.trim(), descricao: "", nota_minima: 7, ativo: true };
-  if (adm.subarea) registro.subarea = adm.subarea;
   const { data, error } = await sb.from("provas")
     .insert(registro)
     .select().single();

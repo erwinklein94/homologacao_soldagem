@@ -1,6 +1,7 @@
 // =====================================================================
-// CONFIGURAÇÃO DO SUPABASE
-// Projeto já preenchido. Onde achar (caso troque): Supabase > Settings > API Keys.
+// CONFIGURAÇÃO DO SUPABASE — Homologação de Solda
+// Este repositório usa APENAS o projeto Supabase de Soldagem (o antigo).
+// Onde achar (caso troque): Supabase > Project Settings > API Keys.
 //
 // A chave "publishable" (sb_publishable_...) é PÚBLICA por natureza e pode ficar
 // no navegador / no repositório. Quem protege os dados é o RLS (Row Level Security),

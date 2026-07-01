@@ -871,6 +871,7 @@ window.PROVAS_SEEDS = {
   "alivio_tensao": [
     {
       "codigo": "ATT4-1",
+      "subarea": "alivio_termico",
       "titulo": "Prova ATT 4 — Parte 1",
       "descricao": "Questões 1 a 10 da planilha PROVA DE ATT 4 RUMO_004 - Rev3, adaptadas para o modelo objetivo do sistema.",
       "nota_minima": 7,
@@ -1159,6 +1160,7 @@ window.PROVAS_SEEDS = {
     },
     {
       "codigo": "ATT4-2",
+      "subarea": "alivio_termico",
       "titulo": "Prova ATT 4 — Parte 2",
       "descricao": "Questões 11 a 20 da planilha PROVA DE ATT 4 RUMO_004 - Rev3, incluindo análise de gráficos, deslocamento e tensor hidráulico.",
       "nota_minima": 7,

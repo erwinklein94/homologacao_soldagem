@@ -16,6 +16,12 @@ nenhuma etapa de build.
 - **Dados & provas** (`admin.html`): todas as tentativas dos alunos (nota, data, instrutor) com
   filtros, e o **editor de provas e questões**.
 - Pode também aplicar/pré-visualizar uma prova.
+- **Só em Alívio de Tensão:** o menu superior tem 4 botões de treinamento —
+  *Alívio de tensão térmica*, *Prospecção de trilhos*, *Operação com verse* e
+  *Temperaturas neutras*. O treinamento selecionado define o que o Painel, o
+  Histórico e o editor de provas mostram. As provas ATT 4 e o histórico da
+  planilha pertencem ao treinamento *Alívio de tensão térmica*.
+  Requer rodar `sql/subareas-alivio-tensao.sql` no Supabase uma vez.
 
 **Aluno / Soldador**
 - **Fazer prova** (`prova.html`) e baixar o certificado.
@@ -48,6 +54,7 @@ sql/multi-area-primeiro-acesso.sql  Migração para mesmo e-mail em Solda e Alí
 sql/seed-provas.sql  As 3 provas de solda em SQL (alternativa ao botão do admin)
 sql/seed-provas-alivio-tensao.sql  As 2 provas ATT 4 de alívio de tensão em SQL
 sql/historico-alivio-tensao.sql  Cria a tabela do histórico de alívio e carrega os dados da planilha
+sql/subareas-alivio-tensao.sql  Migração OBRIGATÓRIA: cria os 4 treinamentos (sub-áreas) de Alívio de Tensão
 assets/           Logos da Rumo
 .nojekyll         Faz o GitHub Pages servir os arquivos como estão
 ```

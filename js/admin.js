@@ -7,6 +7,7 @@
 
 const adm = {
   perfil: null,
+  subarea: null,       // treinamento selecionado (só em alivio_tensao)
   provas: [],          // lista de provas (id, codigo, titulo, ...)
   tentativas: [],      // todas as tentativas (admin enxerga tudo via RLS)
   historico: [],       // histórico legado de Alívio de Tensão (tabela historico_alivio_tensao)
@@ -18,6 +19,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const perfil = await protegerPagina({ requerAdmin: true });
   if (!perfil) return;
   adm.perfil = perfil;
+  adm.subarea = perfil.area === "alivio_tensao" ? getSubareaEscolhida() : null;
+
+  if (adm.subarea) {
+    const titulo = document.querySelector(".page__head h1");
+    if (titulo) titulo.textContent = `Dados & provas — ${getSubareaMeta(adm.subarea).nome}`;
+  }
 
   ligarAbas();
   await Promise.all([carregarProvas(), carregarTentativas(), carregarHistoricoAlivio()]);
@@ -36,7 +43,8 @@ async function carregarProvas() {
     .eq("area", adm.perfil.area)
     .order("codigo");
   if (error) { console.error(error); adm.provas = []; return; }
-  adm.provas = data || [];
+  // Em Alívio de Tensão, mostra só as provas do treinamento selecionado.
+  adm.provas = (data || []).filter((p) => !adm.subarea || subareaDoRegistro(p) === adm.subarea);
 }
 
 async function carregarTentativas() {
@@ -46,13 +54,15 @@ async function carregarTentativas() {
     .eq("area", adm.perfil.area)
     .order("realizado_em", { ascending: false });
   if (error) { console.error(error); adm.tentativas = []; return; }
-  adm.tentativas = data || [];
+  adm.tentativas = (data || []).filter((t) => !adm.subarea || subareaDoRegistro(t) === adm.subarea);
 }
 
 // Histórico legado importado da planilha, agora servido pelo Supabase.
 // Existe apenas na área de Alívio de Tensão (tabela public.historico_alivio_tensao).
 async function carregarHistoricoAlivio() {
-  if (adm.perfil?.area !== "alivio_tensao") { adm.historico = []; return; }
+  // O histórico da planilha é de ATT (Alívio de Tensão Térmica); os demais
+  // treinamentos começam sem legado e mostram só as provas do sistema.
+  if (adm.perfil?.area !== "alivio_tensao" || adm.subarea !== "alivio_termico") { adm.historico = []; return; }
 
   // Remove do banco os registros legados sem nota, conforme solicitado.
   // Se a tabela ainda não existir, o erro será tratado no SELECT abaixo e o snapshot local será usado.
@@ -243,8 +253,8 @@ function renderHistorico() {
     <div class="card stack">
       <div>
         <p class="muted" style="margin:0 0 1rem">
-          Histórico completo de Alívio de Tensão: os registros importados da planilha
-          e as provas aplicadas pelos fiscais aqui no sistema, reunidos em um só lugar.
+          Histórico do treinamento <b>${escaparHtml(getSubareaMeta(adm.subarea).nome)}</b>: os registros importados da planilha
+          (quando existirem) e as provas aplicadas pelos fiscais aqui no sistema, reunidos em um só lugar.
         </p>
         <div class="kpis" data-hist-kpis></div>
       </div>
@@ -377,9 +387,12 @@ function desenharTabelaHistorico(dados, f) {
 // 2) PROVAS & QUESTÕES (editor)
 // =====================================================================
 function obterSeedArea() {
-  if (typeof window.getProvasSeed === "function") return window.getProvasSeed(adm.perfil?.area);
-  if (window.PROVAS_SEEDS && Array.isArray(window.PROVAS_SEEDS[adm.perfil?.area])) return window.PROVAS_SEEDS[adm.perfil.area];
-  return Array.isArray(window.PROVAS_SEED) ? window.PROVAS_SEED : [];
+  let seeds = [];
+  if (typeof window.getProvasSeed === "function") seeds = window.getProvasSeed(adm.perfil?.area) || [];
+  else if (window.PROVAS_SEEDS && Array.isArray(window.PROVAS_SEEDS[adm.perfil?.area])) seeds = window.PROVAS_SEEDS[adm.perfil.area];
+  else if (Array.isArray(window.PROVAS_SEED)) seeds = window.PROVAS_SEED;
+  // Em Alívio de Tensão, só oferece as provas padrão do treinamento selecionado.
+  return seeds.filter((p) => !adm.subarea || subareaDoRegistro(p) === adm.subarea);
 }
 
 function nomeAreaAtual() {
@@ -418,18 +431,19 @@ async function carregarSeed(e, opcoes = {}) {
   travarBtn(btn, true, substituirArea ? "Substituindo…" : "Carregando…");
   try {
     if (substituirArea) {
-      const { error: e0 } = await sb.from("provas").delete().eq("area", adm.perfil.area);
+      let del = sb.from("provas").delete().eq("area", adm.perfil.area);
+      if (adm.subarea) del = del.eq("subarea", adm.subarea); // não apaga provas dos outros treinamentos
+      const { error: e0 } = await del;
       if (e0) throw e0;
     }
 
     for (const p of seedArea) {
       // Cria/atualiza a prova pelo código (único por área) e devolve o id.
+      const registroProva = { area: adm.perfil.area, codigo: p.codigo, titulo: p.titulo, descricao: p.descricao, nota_minima: p.nota_minima, ativo: true, atualizado_em: new Date().toISOString() };
+      if (adm.subarea) registroProva.subarea = p.subarea || adm.subarea;
       const { data: prova, error: e1 } = await sb
         .from("provas")
-        .upsert(
-          { area: adm.perfil.area, codigo: p.codigo, titulo: p.titulo, descricao: p.descricao, nota_minima: p.nota_minima, ativo: true, atualizado_em: new Date().toISOString() },
-          { onConflict: "area,codigo" }
-        )
+        .upsert(registroProva, { onConflict: "area,codigo" })
         .select().single();
       if (e1) throw e1;
 
@@ -483,7 +497,7 @@ function renderListaProvas() {
       <div class="toolbar">
         <h2 style="margin:0">Provas cadastradas</h2>
         <span class="spacer"></span>
-        ${adm.perfil?.area === "alivio_tensao" && obterSeedArea().length ? '<button class="btn btn--ghost btn--sm" data-reset-seed>Substituir provas de alívio</button>' : ''}
+        ${adm.perfil?.area === "alivio_tensao" && obterSeedArea().length ? '<button class="btn btn--ghost btn--sm" data-reset-seed>Substituir provas do treinamento</button>' : ''}
         <button class="btn btn--ghost btn--sm" data-nova-prova>+ Nova prova</button>
       </div>
       ${cards}
@@ -496,7 +510,7 @@ function renderListaProvas() {
   if (btnReset) {
     btnReset.addEventListener("click", (evt) => {
       const qtd = obterSeedArea().length;
-      const ok = confirm(`Isso vai excluir as provas atuais da área de Alívio de Tensão e carregar ${qtd} prova(s) novas baseadas nas planilhas ATT 4. O histórico de tentativas já realizadas será mantido. Deseja continuar?`);
+      const ok = confirm(`Isso vai excluir as provas atuais do treinamento "${getSubareaMeta(adm.subarea).nome}" e carregar ${qtd} prova(s) padrão. As provas dos outros treinamentos e o histórico de tentativas já realizadas serão mantidos. Deseja continuar?`);
       if (ok) carregarSeed(evt, { substituirArea: true });
     });
   }
@@ -504,12 +518,14 @@ function renderListaProvas() {
 }
 
 async function criarProvaVazia() {
-  const titulo = prompt("Título da nova prova:", adm.perfil?.area === "alivio_tensao" ? "Nova prova de alívio de tensão" : "Nova prova de soldagem");
+  const titulo = prompt("Título da nova prova:", adm.perfil?.area === "alivio_tensao" ? `Nova prova de ${getSubareaMeta(adm.subarea).nome.toLowerCase()}` : "Nova prova de soldagem");
   if (!titulo) return;
   const codigo = prompt("Código curto e único (ex.: D):", "");
   if (!codigo) return;
+  const registro = { area: adm.perfil.area, codigo: codigo.trim(), titulo: titulo.trim(), descricao: "", nota_minima: 7, ativo: true };
+  if (adm.subarea) registro.subarea = adm.subarea;
   const { data, error } = await sb.from("provas")
-    .insert({ area: adm.perfil.area, codigo: codigo.trim(), titulo: titulo.trim(), descricao: "", nota_minima: 7, ativo: true })
+    .insert(registro)
     .select().single();
   if (error) { alert("Erro ao criar prova: " + error.message); return; }
   await carregarProvas();

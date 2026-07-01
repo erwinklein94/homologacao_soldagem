@@ -38,6 +38,45 @@ const AREAS_HOMOLOGACAO = {
   },
 };
 
+// Treinamentos (sub-áreas) dentro de Alívio de Tensão.
+// As provas e tentativas de alivio_tensao pertencem a um destes treinamentos.
+const SUBAREAS_ALIVIO = {
+  alivio_termico: { id: "alivio_termico", nome: "Alívio de tensão térmica" },
+  prospeccao_trilhos: { id: "prospeccao_trilhos", nome: "Prospecção de trilhos" },
+  operacao_verse: { id: "operacao_verse", nome: "Operação com verse" },
+  temperaturas_neutras: { id: "temperaturas_neutras", nome: "Temperaturas neutras" },
+};
+const SUBAREA_PADRAO = "alivio_termico";
+
+function subareaValida(sub) {
+  return Object.prototype.hasOwnProperty.call(SUBAREAS_ALIVIO, sub);
+}
+
+function getSubareaEscolhida() {
+  const salva = localStorage.getItem("homologacao_subarea");
+  return subareaValida(salva) ? salva : SUBAREA_PADRAO;
+}
+
+function setSubareaEscolhida(sub) {
+  if (subareaValida(sub)) localStorage.setItem("homologacao_subarea", sub);
+}
+
+function getSubareaMeta(sub) {
+  return SUBAREAS_ALIVIO[sub] || SUBAREAS_ALIVIO[SUBAREA_PADRAO];
+}
+
+window.SUBAREAS_ALIVIO = SUBAREAS_ALIVIO;
+window.getSubareaEscolhida = getSubareaEscolhida;
+window.setSubareaEscolhida = setSubareaEscolhida;
+window.getSubareaMeta = getSubareaMeta;
+
+// Classifica um registro (prova/tentativa) de alivio_tensao pelo treinamento.
+// Registros antigos sem coluna preenchida contam como Alívio de tensão térmica.
+function subareaDoRegistro(r) {
+  return subareaValida(r?.subarea) ? r.subarea : SUBAREA_PADRAO;
+}
+window.subareaDoRegistro = subareaDoRegistro;
+
 function areaValida(area) {
   return Object.prototype.hasOwnProperty.call(AREAS_HOMOLOGACAO, area);
 }
@@ -205,6 +244,21 @@ function montarCabecalho(perfil) {
     ? '<span class="badge-role badge-role--admin">Administrador</span>'
     : '<span class="badge-role">Aluno</span>';
 
+  // Menu de treinamentos: só para o administrador de Alívio de Tensão.
+  // Define qual treinamento os painéis, o histórico e o editor de provas mostram.
+  const mostrarSubareas = ehAdmin && perfil.area === "alivio_tensao";
+  const subAtual = getSubareaEscolhida();
+  const subnav = mostrarSubareas
+    ? `<div class="subnav" aria-label="Treinamentos de Alívio de Tensão">
+        <div class="subnav__inner">
+          <span class="subnav__label">Treinamento:</span>
+          ${Object.values(SUBAREAS_ALIVIO).map((s) =>
+            `<button type="button" data-subarea-btn="${s.id}"${s.id === subAtual ? ' class="is-active"' : ""}>${escaparHtml(s.nome)}</button>`
+          ).join("")}
+        </div>
+      </div>`
+    : "";
+
   host.innerHTML = `
     <div class="topbar__inner">
       <a class="brand" href="${ehAdmin ? "dashboard.html" : "prova.html"}">
@@ -220,9 +274,15 @@ function montarCabecalho(perfil) {
         </div>
         <button class="btn btn--ghost btn--sm" data-sair>Sair</button>
       </div>
-    </div>`;
+    </div>${subnav}`;
 
   host.querySelector("[data-sair]").addEventListener("click", sair);
+  host.querySelectorAll("[data-subarea-btn]").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (b.dataset.subareaBtn === getSubareaEscolhida()) return;
+      setSubareaEscolhida(b.dataset.subareaBtn);
+      window.location.reload();
+    }));
 }
 window.montarCabecalho = montarCabecalho;
 

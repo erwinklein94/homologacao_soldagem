@@ -26,14 +26,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   const perfil = await protegerPagina({ requerAdmin: true });
   if (!perfil) return;
   painel.perfil = perfil;
+  painel.subarea = perfil.area === "alivio_tensao" ? getSubareaEscolhida() : null;
 
   const [tentativas, alunos, historicoAlivio] = await Promise.all([
     carregarTentativas(perfil.area),
     carregarAlunos(perfil.area),
-    carregarHistoricoAlivio(perfil.area),
+    carregarHistoricoAlivio(perfil.area, painel.subarea),
   ]);
 
-  painel.tentativas = tentativas;
+  // Em Alívio de Tensão, o painel mostra só o treinamento selecionado no menu.
+  painel.tentativas = painel.subarea
+    ? tentativas.filter((t) => subareaDoRegistro(t) === painel.subarea)
+    : tentativas;
   painel.alunos = alunos;
   painel.historicoAlivio = historicoAlivio;
 
@@ -60,8 +64,9 @@ async function carregarAlunos(area) {
   return data || [];
 }
 
-async function carregarHistoricoAlivio(area) {
-  if (area !== "alivio_tensao") return [];
+async function carregarHistoricoAlivio(area, subarea) {
+  // O histórico da planilha pertence ao treinamento Alívio de tensão térmica (ATT).
+  if (area !== "alivio_tensao" || subarea !== "alivio_termico") return [];
   const { data, error } = await sb
     .from("historico_alivio_tensao")
     .select("*")
@@ -162,12 +167,13 @@ function renderKPIs(tentativas, alunos) {
 // PAINEL ALÍVIO DE TENSÃO — tentativas + histórico
 // =====================================================================
 function renderPainelAlivioTensao() {
+  const nomeTreinamento = getSubareaMeta(painel.subarea).nome;
   const cab = document.querySelector(".page__head");
   if (cab) {
     cab.innerHTML = `
       <div class="eyebrow">Área do administrador · Alívio de Tensão</div>
-      <h1>Painel de desempenho</h1>
-      <p class="muted">Visão consolidada das provas realizadas no sistema e do histórico importado, com filtros para análise por empresa, gerência, local, modalidade, categoria, resultado, origem e período.</p>`;
+      <h1>Painel — ${escaparHtml(nomeTreinamento)}</h1>
+      <p class="muted">Visão consolidada das provas realizadas no sistema e do histórico importado deste treinamento, com filtros para análise por empresa, gerência, local, modalidade, categoria, resultado, origem e período.</p>`;
   }
 
   const dados = montarHistoricoAlivioCompleto();
